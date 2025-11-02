@@ -1,0 +1,40 @@
+<div class="container">
+  <header>
+    <h1>{{title}}</h1>
+    <p>Angular + Node.js Fullstack Application</p>
+  </header>
+  
+  <main>
+    <div class="card">
+      <h2>Welcome to MMFV</h2>
+      <p>This is a full-stack application demonstrating:</p>
+      <ul>
+        <li>Angular frontend with TypeScript</li>
+        <li>Node.js backend with Express and TypeScript</li>
+        <li>RESTful API communication</li>
+        <li>Standalone components with modern Angular</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>API Connection Test</h2>
+      <button (click)="testApi()" [disabled]="loading">
+        {{ loading ? 'Loading...' : 'Test API Connection' }}
+      </button>
+      
+      <div *ngIf="apiResponse" class="response">
+        <p><strong>Message:</strong> {{ apiResponse.message }}</p>
+        <p><strong>Timestamp:</strong> {{ apiResponse.timestamp }}</p>
+      </div>
+      
+      <div *ngIf="error" class="error">
+        <p>{{ error }}</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Powered by Angular {{ angularVersion }} and Node.js</p>
+  </footer>
+</div>
+
