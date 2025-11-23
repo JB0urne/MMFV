@@ -22,7 +22,7 @@ export class MoviesController {
   }
 
   @Get()
-  async findAll() {
+  async getMovies() {
     return this.moviesService.findAll();
   }
 

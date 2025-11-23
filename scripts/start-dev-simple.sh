@@ -24,6 +24,8 @@ echo -e "${BLUE}Starting backend and frontend...${NC}"
 echo ""
 
 # Start backend and frontend using concurrently
+# Suppress Node.js deprecation warnings
+export NODE_OPTIONS="--no-deprecation"
 cd "$PROJECT_ROOT"
 exec concurrently "npm run backend:dev" "npm run frontend"
 

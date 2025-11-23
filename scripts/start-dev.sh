@@ -44,6 +44,8 @@ echo -e "${BLUE}Launching backend and frontend servers...${NC}"
 
 # Start backend and frontend using concurrently
 # Use exec to replace shell process with concurrently
+# Suppress Node.js deprecation warnings
+export NODE_OPTIONS="--no-deprecation"
 set -e  # Re-enable error checking for the final command
 exec concurrently "npm run backend:dev" "npm run frontend"
 
