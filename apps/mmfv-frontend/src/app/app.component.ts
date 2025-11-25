@@ -52,18 +52,10 @@ export class AppComponent implements OnInit {
     ),
     shareReplay(1)
   );
-  
-  // Loading state - true initially, false after first emission
-  moviesLoading$: Observable<boolean> = this.movies$.pipe(
-    map(() => false),
-    startWith(true),
-    catchError(() => of(false))
-  );
 
   // Error state
   moviesError$: Observable<string | null> = this.errorSubject.asObservable();
 
-  // Total movies count
   totalMovies$: Observable<number> = this.movies$.pipe(
     map((movies) => movies.length)
   );
@@ -77,8 +69,7 @@ export class AppComponent implements OnInit {
     map(([movies, pageIndex, pageSize]) => {
       const start = pageIndex * pageSize;
       const end = start + pageSize;
-      return []
-      // return movies.slice(start, end);
+      return movies.slice(start, end);
     })
   );
 

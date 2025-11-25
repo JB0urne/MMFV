@@ -47,5 +47,5 @@ echo -e "${BLUE}Launching backend and frontend servers...${NC}"
 # Suppress Node.js deprecation warnings
 export NODE_OPTIONS="--no-deprecation"
 set -e  # Re-enable error checking for the final command
-exec concurrently "npm run backend:dev" "npm run frontend"
+exec npm run backend:dev
 

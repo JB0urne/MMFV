@@ -19,20 +19,15 @@
     <div class="card">
       <h2>Movies</h2>
       
-      <div *ngIf="moviesLoading$ | async" class="loading-container">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Loading movies...</p>
-      </div>
-      
       <div *ngIf="moviesError$ | async as error" class="error">
         <p>{{ error }}</p>
         <button mat-raised-button color="primary" (click)="loadMovies()">Retry</button>
       </div>
       
-      <ng-container *ngIf="(moviesLoading$ | async) === false && !(moviesError$ | async)">
-        <ng-container *ngIf="(movies$ | async) as movies">
+      <ng-container *ngIf="!(moviesError$ | async)">
+        <ng-container *ngIf="(paginatedMovies$ | async) as movies">
           <div *ngIf="movies.length > 0" class="table-container">
-            <table mat-table [dataSource]="paginatedMovies$ | async" class="mat-elevation-z8">
+            <table mat-table [dataSource]="movies" class="mat-elevation-z8">
               <!-- Title Column -->
               <ng-container matColumnDef="title">
                 <th mat-header-cell *matHeaderCellDef>Title</th>
