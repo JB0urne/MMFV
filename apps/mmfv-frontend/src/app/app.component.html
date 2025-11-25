@@ -19,12 +19,6 @@
     <div class="card">
       <h2>Movies</h2>
       
-      <div *ngIf="moviesError$ | async as error" class="error">
-        <p>{{ error }}</p>
-        <button mat-raised-button color="primary" (click)="loadMovies()">Retry</button>
-      </div>
-      
-      <ng-container *ngIf="!(moviesError$ | async)">
         <ng-container *ngIf="(paginatedMovies$ | async) as movies">
           <div *ngIf="movies.length > 0" class="table-container">
             <table mat-table [dataSource]="movies" class="mat-elevation-z8">
@@ -64,7 +58,6 @@
             <p>No movies found.</p>
           </div>
         </ng-container>
-      </ng-container>
     </div>
   </main>
 

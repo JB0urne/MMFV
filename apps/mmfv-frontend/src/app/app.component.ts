@@ -45,7 +45,6 @@ export class AppComponent implements OnInit {
       this.moviesService.getMovies().pipe(
         catchError((error) => {
           console.error('Error loading movies:', error);
-          this.errorSubject.next(`Failed to load movies: ${error.message || 'Unknown error'}`);
           return of([]);
         })
       )
@@ -53,14 +52,10 @@ export class AppComponent implements OnInit {
     shareReplay(1)
   );
 
-  // Error state
-  moviesError$: Observable<string | null> = this.errorSubject.asObservable();
-
   totalMovies$: Observable<number> = this.movies$.pipe(
     map((movies) => movies.length)
   );
 
-  // Paginated movies
   paginatedMovies$: Observable<Movie[]> = combineLatest([
     this.movies$,
     this.pageIndex$,
