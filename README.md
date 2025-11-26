@@ -18,6 +18,7 @@ A monorepo containing an Angular frontend and NestJS backend, both written in Ty
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - Docker and Docker Compose
 - npm or yarn
@@ -32,25 +33,30 @@ npm install
 ### Development
 
 **Start Backend with Docker:**
+
 ```bash
 npm run backend
 ```
 
 **Start Frontend:**
+
 ```bash
 npm run frontend
 ```
 
 **Start both simultaneously:**
+
 ```bash
 npm run dev
 ```
 
 This will start:
+
 - **Backend** on http://localhost:3000 (via Docker)
 - **Frontend** on http://localhost:4200
 
 **Stop Backend:**
+
 ```bash
 npm run backend:down
 ```

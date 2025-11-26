@@ -11,78 +11,72 @@ import { MoviesService } from '@mmfv/frontend/data-access/movies';
 import { Movie } from '@mmfv/frontend/data-access/movies';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatProgressSpinnerModule,
-    MatButtonModule
-  ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+    selector: 'app-root',
+    standalone: true,
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatProgressSpinnerModule,
+        MatButtonModule,
+    ],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
-  title = 'MMFV';
-  angularVersion = '21';
+    title = 'MMFV';
+    angularVersion = '21';
 
-  displayedColumns: string[] = ['title', 'imdbId', 'year'];
-  
-  // Pagination state
-  private pageSizeSubject = new BehaviorSubject<number>(10);
-  private pageIndexSubject = new BehaviorSubject<number>(0);
-  private reloadTrigger$ = new BehaviorSubject<void>(undefined);
-  private errorSubject = new BehaviorSubject<string | null>(null);
-  
-  pageSize$ = this.pageSizeSubject.asObservable();
-  pageIndex$ = this.pageIndexSubject.asObservable();
+    displayedColumns: string[] = ['title', 'imdbId', 'year'];
 
-  // Movies observable - reloads when trigger emits
-  movies$: Observable<Movie[]> = this.reloadTrigger$.pipe(
-    switchMap(() => 
-      this.moviesService.getMovies().pipe(
-        catchError((error) => {
-          console.error('Error loading movies:', error);
-          return of([]);
-        })
-      )
-    ),
-    shareReplay(1)
-  );
+    // Pagination state
+    private pageSizeSubject = new BehaviorSubject<number>(10);
+    private pageIndexSubject = new BehaviorSubject<number>(0);
+    private reloadTrigger$ = new BehaviorSubject<void>(undefined);
+    private errorSubject = new BehaviorSubject<string | null>(null);
 
-  totalMovies$: Observable<number> = this.movies$.pipe(
-    map((movies) => movies.length)
-  );
+    pageSize$ = this.pageSizeSubject.asObservable();
+    pageIndex$ = this.pageIndexSubject.asObservable();
 
-  paginatedMovies$: Observable<Movie[]> = combineLatest([
-    this.movies$,
-    this.pageIndex$,
-    this.pageSize$
-  ]).pipe(
-    map(([movies, pageIndex, pageSize]) => {
-      const start = pageIndex * pageSize;
-      const end = start + pageSize;
-      return movies.slice(start, end);
-    })
-  );
+    // Movies observable - reloads when trigger emits
+    movies$: Observable<Movie[]> = this.reloadTrigger$.pipe(
+        switchMap(() =>
+            this.moviesService.getMovies().pipe(
+                catchError(error => {
+                    console.error('Error loading movies:', error);
+                    return of([]);
+                }),
+            ),
+        ),
+        shareReplay(1),
+    );
 
-  constructor(private moviesService: MoviesService) {}
+    totalMovies$: Observable<number> = this.movies$.pipe(map(movies => movies.length));
 
-  ngOnInit() {
-    // Trigger initial load
-    this.reloadTrigger$.next();
-  }
+    paginatedMovies$: Observable<Movie[]> = combineLatest([this.movies$, this.pageIndex$, this.pageSize$]).pipe(
+        map(([movies, pageIndex, pageSize]) => {
+            const start = pageIndex * pageSize;
+            const end = start + pageSize;
+            return movies.slice(start, end);
+        }),
+    );
 
-  loadMovies() {
-    // Reset error and trigger reload
-    this.errorSubject.next(null);
-    this.reloadTrigger$.next();
-  }
+    constructor(private moviesService: MoviesService) {}
 
-  onPageChange(event: PageEvent) {
-    this.pageIndexSubject.next(event.pageIndex);
-    this.pageSizeSubject.next(event.pageSize);
-  }
+    ngOnInit() {
+        // Trigger initial load
+        this.reloadTrigger$.next();
+    }
+
+    loadMovies() {
+        // Reset error and trigger reload
+        this.errorSubject.next(null);
+        this.reloadTrigger$.next();
+    }
+
+    onPageChange(event: PageEvent) {
+        this.pageIndexSubject.next(event.pageIndex);
+        this.pageSizeSubject.next(event.pageSize);
+    }
 }

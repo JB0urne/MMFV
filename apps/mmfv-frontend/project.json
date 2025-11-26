@@ -1,26 +1,24 @@
 {
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "frontend",
-  "root": "apps/mmfv-frontend",
-  "sourceRoot": "apps/mmfv-frontend/src",
-  "projectType": "application",
-  "targets": {
-    "serve": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "ng serve",
-        "cwd": "apps/mmfv-frontend"
-      }
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "name": "frontend",
+    "root": "apps/mmfv-frontend",
+    "sourceRoot": "apps/mmfv-frontend/src",
+    "projectType": "application",
+    "targets": {
+        "serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ng serve",
+                "cwd": "apps/mmfv-frontend"
+            }
+        },
+        "build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ng build",
+                "cwd": "apps/mmfv-frontend"
+            }
+        }
     },
-    "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "ng build",
-        "cwd": "apps/mmfv-frontend"
-      }
-    }
-  },
-  "tags": []
+    "tags": []
 }
-
-

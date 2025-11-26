@@ -1,12 +1,10 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "workspaceLayout": {
-    "appsDir": "apps",
-    "libsDir": "libs"
-  },
-  "npmScope": "mmfv",
-  "targetDefaults": {},
-  "generators": {}
+    "$schema": "./node_modules/nx/schemas/nx-schema.json",
+    "workspaceLayout": {
+        "appsDir": "apps",
+        "libsDir": "libs"
+    },
+    "npmScope": "mmfv",
+    "targetDefaults": {},
+    "generators": {}
 }
-
-

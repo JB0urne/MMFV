@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  // Add your routes here
+    // Add your routes here
 ];
-
