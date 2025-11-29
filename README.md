@@ -67,7 +67,7 @@ npm run backend:down
 - `npm run backend:down` - Stop backend Docker container
 - `npm run backend:dev` - Run backend locally without Docker (requires CD to apps/mmfv-backend)
 - `npm run frontend` - Start Angular frontend development server
-- `npm run dev` - Run both frontend and backend in development mode
+- `npm run dev` - Run backend and mongoDb in development mode
 - `npm run build` - Build both applications
 
 ## Features
