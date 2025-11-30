@@ -1,3 +1,7 @@
+export interface asdf {
+    aProperty: string;
+}
+
 export interface Movie {
     _id: string;
     title: string;

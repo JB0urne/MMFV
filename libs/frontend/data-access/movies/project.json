@@ -1,0 +1,17 @@
+{
+    "name": "frontend-data-access-movies",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/frontend/data-access/movies/src",
+    "projectType": "library",
+    "tags": ["angular", "util"],
+    "targets": {
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": ["{options.outputFile}"],
+            "options": {
+                "lintFilePatterns": ["libs/frontend/data-access/movies/**/*.ts"]
+            }
+        }
+    }
+}
+

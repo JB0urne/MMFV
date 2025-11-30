@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { map, startWith, catchError, shareReplay, switchMap } from 'rxjs/operators';
 import { MoviesService } from '@mmfv/frontend/data-access/movies';
-import { Movie } from '@mmfv/frontend/data-access/movies';
+import { Movie } from '@mmfv/interfaces';
 
 @Component({
     selector: 'app-root',

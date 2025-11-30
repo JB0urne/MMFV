@@ -1,26 +1,28 @@
 {
-    "extends": "../../tsconfig.base.json",
-    "compileOnSave": false,
+    "extends": "../../../../tsconfig.base.json",
     "compilerOptions": {
-        "baseUrl": "../../",
-        "forceConsistentCasingInFileNames": true,
+        "target": "es2022",
+        "moduleResolution": "bundler",
         "strict": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "target": "es2020"
+        "module": "preserve"
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,
         "strictInjectionParameters": true,
         "strictInputAccessModifiers": true,
+        "typeCheckHostBindings": true,
         "strictTemplates": true
     },
     "files": [],
     "include": [],
     "references": [
         {
-            "path": "./tsconfig.app.json"
+            "path": "./tsconfig.lib.json"
         }
-    ],
-    "exclude": ["node_modules"]
+    ]
 }
+

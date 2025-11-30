@@ -1,0 +1,23 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "rootDir": ".",
+        "sourceMap": true,
+        "declaration": false,
+        "moduleResolution": "bundler",
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "target": "es2015",
+        "module": "esnext",
+        "lib": ["es2020", "dom"],
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "baseUrl": ".",
+        "paths": {
+            "@mmfv/interfaces": ["libs/shared/interfaces/src/index.ts"],
+            "@mmfv/frontend/data-access/movies": ["libs/frontend/data-access/movies/src/index.ts"]
+        },
+        "strict": true
+    },
+    "exclude": ["node_modules", "tmp"]
+}
