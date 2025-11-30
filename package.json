@@ -3,16 +3,10 @@
     "version": "1.0.0",
     "description": "Monorepo with Angular frontend and NestJS backend, both in TypeScript",
     "scripts": {
-        "nx": "nx",
-        "backend:down": "docker compose down",
         "backend:dev": "cd apps/mmfv-backend && nest start --watch",
-        "frontend": "cd apps/mmfv-frontend && ng serve",
         "mongodb:start": "docker compose up -d mongodb",
         "mongodb:reset": "./mongodb/scripts/reset-and-import.sh",
-        "backend": "./scripts/start-dev.sh",
-        "backend:build": "cd apps/mmfv-backend && nest build",
-        "frontend:build": "cd apps/mmfv-frontend && ng build",
-        "build": "npm run backend:build && npm run frontend:build"
+        "backend": "./scripts/start-dev.sh"
     },
     "keywords": [
         "angular",
@@ -51,9 +45,10 @@
         "@nx/workspace": "^22.0.2",
         "@types/express": "^4.17.21",
         "@types/node": "^20.10.0",
-        "nx": "^22.0.2",
+        "nx": "22.0.2",
         "prettier": "3.6.2",
         "ts-node": "^10.9.2",
         "typescript": "^5.9.0"
-    }
+    },
+    "nx": {}
 }

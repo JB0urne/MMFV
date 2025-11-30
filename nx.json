@@ -5,6 +5,5 @@
         "libsDir": "libs"
     },
     "npmScope": "mmfv",
-    "targetDefaults": {},
     "generators": {}
 }
