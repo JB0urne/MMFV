@@ -6,13 +6,13 @@ export type MovieDocument = Movie & Document;
 @Schema({ timestamps: true })
 export class Movie {
     @Prop({ required: true, index: true })
-    title: string;
+    title: string = '';
 
     @Prop({ required: true, unique: true, index: true })
-    imdbId: string;
+    imdbId: string = '';
 
     @Prop({ required: true })
-    year: number;
+    year: number = 0;
 }
 
 export const MovieSchema = SchemaFactory.createForClass(Movie);
