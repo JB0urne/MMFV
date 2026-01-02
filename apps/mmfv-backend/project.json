@@ -1,0 +1,33 @@
+{
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "name": "mmfv-backend",
+    "sourceRoot": "apps/mmfv-backend/src",
+    "projectType": "application",
+    "tags": ["backend", "nest"],
+    "targets": {
+        "build": {
+            "executor": "@nx/webpack:webpack",
+            "options": {
+                "outputPath": "dist/apps/mmfv-backend",
+                "main": "apps/mmfv-backend/src/main.ts",
+                "tsConfig": "apps/mmfv-backend/tsconfig.json",
+                "assets": ["apps/mmfv-backend/src/assets"],
+                "buildLibsFromSource": true,
+                "target": "node",
+                "compiler": "tsc",
+                "generatePackageJson": true
+            },
+            "outputs": ["{options.outputPath}"]
+        },
+        "serve": {
+            "executor": "@nx/js:node",
+            "options": {
+                "buildTarget": "mmfv-backend:build",
+                "host": "0.0.0.0",
+                "port": 3000
+            },
+            "continuous": true
+        }
+    }
+}
+
