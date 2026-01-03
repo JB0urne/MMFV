@@ -1,6 +1,6 @@
 {
-    "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "name": "mmfv-backend",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "apps/mmfv-backend/src",
     "projectType": "application",
     "tags": ["backend", "nest"],
@@ -11,7 +11,6 @@
                 "outputPath": "dist/apps/mmfv-backend",
                 "main": "apps/mmfv-backend/src/main.ts",
                 "tsConfig": "apps/mmfv-backend/tsconfig.json",
-                "assets": ["apps/mmfv-backend/src/assets"],
                 "buildLibsFromSource": true,
                 "target": "node",
                 "compiler": "tsc",
@@ -30,4 +29,3 @@
         }
     }
 }
-

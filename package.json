@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Monorepo with Angular frontend and NestJS backend, both in TypeScript",
     "scripts": {
-        "backend:dev": "cd apps/mmfv-backend && nest start --watch",
+        "backend:dev": "cd apps/mmfv-backend && nx serve mmfv-backend",
         "mongodb:start": "docker compose up -d mongodb",
         "mongodb:reset": "./mongodb/scripts/reset-and-import.sh",
         "backend": "./scripts/start-dev.sh"
@@ -51,6 +51,8 @@
         "@nx/eslint": "22.0.2",
         "@nx/eslint-plugin": "22.0.2",
         "@nx/js": "22.0.2",
+        "@nx/nest": "^22.0.2",
+        "@nx/webpack": "^22.0.2",
         "@nx/workspace": "^22.0.2",
         "@schematics/angular": "~20.3.0",
         "@swc-node/register": "~1.9.1",
