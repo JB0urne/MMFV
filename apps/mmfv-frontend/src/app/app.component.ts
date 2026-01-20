@@ -8,7 +8,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MoviesService } from '@mmfv/frontend/data-access/movies';
 import { Movie } from '@mmfv/interfaces';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { catchError, map, shareReplay, switchMap } from 'rxjs/operators';
+import { catchError, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-root',
@@ -78,5 +78,46 @@ export class AppComponent implements OnInit {
     onPageChange(event: PageEvent) {
         this.pageIndexSubject.next(event.pageIndex);
         this.pageSizeSubject.next(event.pageSize);
+    }
+
+    addRandomMovie() {
+        // Generate random movie data
+        const randomTitles = [
+            'The Adventure Begins',
+            'Mystery of the Lost City',
+            'Echoes of Tomorrow',
+            'The Last Stand',
+            'Beyond the Horizon',
+            'Shadows in the Night',
+            'The Quest for Truth',
+            'Rising Phoenix',
+            'The Silent Storm',
+            'Journey to the Stars',
+        ];
+
+        const randomTitle = randomTitles[Math.floor(Math.random() * randomTitles.length)];
+        const randomYear = Math.floor(Math.random() * (2024 - 1950 + 1)) + 1950;
+        const randomImdbId = `tt${Math.floor(Math.random() * 9000000 + 1000000)}`;
+
+        const newMovie = {
+            title: randomTitle,
+            imdbId: randomImdbId,
+            year: randomYear,
+        };
+
+        // Call the service to create the movie
+        this.moviesService
+            .createMovie(newMovie)
+            .pipe(
+                tap(() => {
+                    // Reload movies after successful creation
+                    this.loadMovies();
+                }),
+                catchError(error => {
+                    console.error('Error adding random movie:', error);
+                    return of(null);
+                }),
+            )
+            .subscribe();
     }
 }

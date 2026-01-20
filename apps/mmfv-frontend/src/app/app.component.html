@@ -18,6 +18,9 @@
 
         <div class="card">
             <h2>Movies</h2>
+            <button mat-raised-button color="primary" (click)="addRandomMovie()" style="margin-bottom: 16px;">
+                Add Random Movie
+            </button>
 
             @if (paginatedMovies$ | async; as movies) {
                 @if (movies.length > 0) {

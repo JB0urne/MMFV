@@ -14,10 +14,18 @@ export class MoviesService {
 
     getMovies(params?: HttpParams): Observable<Movie[]> {
         return this.http.get<Movie[]>(this.endpointUrl, { params }).pipe(
-            timeout(10000), // 10 second timeout
             catchError(error => {
                 console.error('Error loading movies:', error);
                 return of([]);
+            }),
+        );
+    }
+
+    createMovie(movie: { title: string; imdbId: string; year: number }): Observable<Movie> {
+        return this.http.post<Movie>(this.endpointUrl, movie).pipe(
+            catchError(error => {
+                console.error('Error creating movie:', error);
+                throw error;
             }),
         );
     }
