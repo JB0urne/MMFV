@@ -27,6 +27,7 @@ import { catchError, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 export class AppComponent implements OnInit {
     title = 'MMFV';
     angularVersion = '21';
+    showSortierenMenu = false;
 
     displayedColumns: string[] = ['title', 'imdbId', 'year'];
 
@@ -119,5 +120,15 @@ export class AppComponent implements OnInit {
                 }),
             )
             .subscribe();
+    }
+
+    toggleSortierenMenu() {
+        this.showSortierenMenu = !this.showSortierenMenu;
+    }
+
+    selectSubmenuItem(item: string) {
+        console.log('Selected submenu item:', item);
+        // This will be replaced with navigation logic later
+        // For now, just log the selection
     }
 }
