@@ -1,116 +1,19 @@
-<header class="main-header">
-    <div class="nav_container">
-        <div class="nav">
-            <div id="settings">
-                <span>⚙</span>
-            </div>
-            <div id="whats_that">
-                <span>?</span>
-            </div>
-            <div id="logo_teil_1">
-                <div id="logo_teil_2">
-                    <svg width="80" height="40" viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="80" height="40" fill="none" stroke="#c0d0d0" stroke-width="2" stroke-dasharray="4 4"/>
-                        <text x="40" y="25" font-family="Arial, sans-serif" font-size="14" fill="#c0d0d0" text-anchor="middle">LOGO</text>
-                    </svg>
-                </div>
-            </div>
-            <ul>
-                <li>
-                    <div>
-                        <div>FILTER</div>
-                    </div>
-                </li>
-                <li (click)="toggleSortierenMenu()" class="menu-item-clickable" [class.active]="showSortierenMenu">
-                    <div>
-                        <div>SORTIEREN</div>
-                    </div>
-                    <div class="submenu-dropdown" [class.visible]="showSortierenMenu">
-                        <ul>
-                            <li (click)="selectSubmenuItem('test1')" class="submenu-item">tests</li>
-                            <li (click)="selectSubmenuItem('test2')" class="submenu-item">tests</li>
-                            <li (click)="selectSubmenuItem('test3')" class="submenu-item">tests</li>
-                            <li (click)="selectSubmenuItem('test4')" class="submenu-item">tests</li>
-                        </ul>
-                    </div>
-                </li>
-                <li>
-                    <div>
-                        <div>SUCHEN</div>
-                    </div>
-                </li>
-                <li>
-                    <div>
-                        <div>LOGIN</div>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>
-</header>
+<app-header></app-header>
 
 <div class="container">
     <main>
-        <div class="card">
-            <h2>Welcome to MMFV</h2>
-            <p>This is a full-stack application demonstrating:</p>
-            <ul>
-                <li>Angular frontend with TypeScript</li>
-                <li>Node.js backend with Express and TypeScript</li>
-                <li>RESTful API communication</li>
-                <li>Standalone components with modern Angular</li>
-            </ul>
-        </div>
+        <app-welcome></app-welcome>
 
-        <div class="card">
-            <h2>Movies</h2>
-            <button mat-raised-button color="primary" (click)="addRandomMovie()" style="margin-bottom: 16px;">
-                Add Random Movie
-            </button>
-
-            @if (paginatedMovies$ | async; as movies) {
-                @if (movies.length > 0) {
-                    <div class="table-container">
-                        <table mat-table [dataSource]="movies" class="mat-elevation-z8">
-                            <!-- Title Column -->
-                            <ng-container matColumnDef="title">
-                                <th mat-header-cell *matHeaderCellDef>Title</th>
-                                <td mat-cell *matCellDef="let movie">{{ movie.title }}</td>
-                            </ng-container>
-                            <!-- IMDB ID Column -->
-                            <ng-container matColumnDef="imdbId">
-                                <th mat-header-cell *matHeaderCellDef>IMDB ID</th>
-                                <td mat-cell *matCellDef="let movie">{{ movie.imdbId }}</td>
-                            </ng-container>
-                            <!-- Year Column -->
-                            <ng-container matColumnDef="year">
-                                <th mat-header-cell *matHeaderCellDef>Year</th>
-                                <td mat-cell *matCellDef="let movie">{{ movie.year }}</td>
-                            </ng-container>
-                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-                        </table>
-                        <mat-paginator
-                            [length]="totalMovies$ | async"
-                            [pageSize]="pageSize$ | async"
-                            [pageIndex]="pageIndex$ | async"
-                            [pageSizeOptions]="[5, 10, 20, 50]"
-                            [showFirstLastButtons]="true"
-                            (page)="onPageChange($event)"
-                        >
-                        </mat-paginator>
-                    </div>
-                }
-                @if (movies.length === 0) {
-                    <div class="empty-state">
-                        <p>No movies found.</p>
-                    </div>
-                }
-            }
-        </div>
+        <app-list-view
+            [paginatedMovies$]="paginatedMovies$"
+            [totalMovies$]="totalMovies$"
+            [pageSize$]="pageSize$"
+            [pageIndex$]="pageIndex$"
+            [displayedColumns]="displayedColumns"
+            (pageChange)="onPageChange($event)"
+            (addRandomMovie)="addRandomMovie()"
+        ></app-list-view>
     </main>
 
-    <footer>
-        <p>Powered by Angular {{ angularVersion }} and Node.js</p>
-    </footer>
+    <app-footer [angularVersion]="angularVersion"></app-footer>
 </div>

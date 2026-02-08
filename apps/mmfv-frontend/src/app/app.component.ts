@@ -1,25 +1,25 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSortModule } from '@angular/material/sort';
-import { MatTableModule } from '@angular/material/table';
 import { MoviesService } from '@mmfv/frontend/data-access/movies';
 import { Movie } from '@mmfv/interfaces';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { catchError, map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { HeaderComponent } from './components/header/header.component';
+import { WelcomeComponent } from './components/welcome/welcome.component';
+import { FooterComponent } from './components/footer/footer.component';
+import { ListViewComponent } from './features/movies/list-view/list-view.component';
 
 @Component({
     selector: 'app-root',
     standalone: true,
     imports: [
         CommonModule,
-        MatTableModule,
+        HeaderComponent,
+        WelcomeComponent,
+        FooterComponent,
+        ListViewComponent,
         MatPaginatorModule,
-        MatSortModule,
-        MatProgressSpinnerModule,
-        MatButtonModule,
     ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css',
@@ -27,7 +27,6 @@ import { catchError, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 export class AppComponent implements OnInit {
     title = 'MMFV';
     angularVersion = '21';
-    showSortierenMenu = false;
 
     displayedColumns: string[] = ['title', 'imdbId', 'year'];
 
@@ -66,12 +65,10 @@ export class AppComponent implements OnInit {
     constructor(private moviesService: MoviesService) {}
 
     ngOnInit() {
-        // Trigger initial load
         this.reloadTrigger$.next();
     }
 
     loadMovies() {
-        // Reset error and trigger reload
         this.errorSubject.next(null);
         this.reloadTrigger$.next();
     }
@@ -82,7 +79,6 @@ export class AppComponent implements OnInit {
     }
 
     addRandomMovie() {
-        // Generate random movie data
         const randomTitles = [
             'The Adventure Begins',
             'Mystery of the Lost City',
@@ -106,12 +102,10 @@ export class AppComponent implements OnInit {
             year: randomYear,
         };
 
-        // Call the service to create the movie
         this.moviesService
             .createMovie(newMovie)
             .pipe(
                 tap(() => {
-                    // Reload movies after successful creation
                     this.loadMovies();
                 }),
                 catchError(error => {
@@ -120,15 +114,5 @@ export class AppComponent implements OnInit {
                 }),
             )
             .subscribe();
-    }
-
-    toggleSortierenMenu() {
-        this.showSortierenMenu = !this.showSortierenMenu;
-    }
-
-    selectSubmenuItem(item: string) {
-        console.log('Selected submenu item:', item);
-        // This will be replaced with navigation logic later
-        // For now, just log the selection
     }
 }

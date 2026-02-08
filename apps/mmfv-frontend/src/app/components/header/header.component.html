@@ -1,0 +1,50 @@
+<header class="main-header">
+    <div class="nav_container">
+        <div class="nav">
+            <div id="settings">
+                <span>⚙</span>
+            </div>
+            <div id="whats_that">
+                <span>?</span>
+            </div>
+            <div id="logo_teil_1">
+                <div id="logo_teil_2">
+                    <svg width="80" height="40" viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="80" height="40" fill="none" stroke="#c0d0d0" stroke-width="2" stroke-dasharray="4 4"/>
+                        <text x="40" y="25" font-family="Arial, sans-serif" font-size="14" fill="#c0d0d0" text-anchor="middle">LOGO</text>
+                    </svg>
+                </div>
+            </div>
+            <ul>
+                <li>
+                    <div>
+                        <div>FILTER</div>
+                    </div>
+                </li>
+                <li (click)="toggleSortierenMenu()" class="menu-item-clickable" [class.active]="showSortierenMenu">
+                    <div>
+                        <div>SORTIEREN</div>
+                    </div>
+                    <div class="submenu-dropdown" [class.visible]="showSortierenMenu">
+                        <ul>
+                            <li (click)="selectSubmenuItem('test1')" class="submenu-item">tests</li>
+                            <li (click)="selectSubmenuItem('test2')" class="submenu-item">tests</li>
+                            <li (click)="selectSubmenuItem('test3')" class="submenu-item">tests</li>
+                            <li (click)="selectSubmenuItem('test4')" class="submenu-item">tests</li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <div>SUCHEN</div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <div>LOGIN</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
