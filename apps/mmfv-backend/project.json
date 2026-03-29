@@ -6,16 +6,12 @@
     "tags": ["backend", "nest"],
     "targets": {
         "build": {
-            "executor": "@nx/webpack:webpack",
+            "executor": "@nx/js:tsc",
             "options": {
                 "outputPath": "dist/apps/mmfv-backend",
                 "main": "apps/mmfv-backend/src/main.ts",
                 "tsConfig": "apps/mmfv-backend/tsconfig.json",
-                "buildLibsFromSource": true,
-                "target": "node",
-                "compiler": "tsc",
-                "generatePackageJson": true,
-                "webpackConfig": "apps/mmfv-backend/webpack.config.js"
+                "generatePackageJson": true
             },
             "outputs": ["{options.outputPath}"]
         },
