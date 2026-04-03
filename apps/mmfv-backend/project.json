@@ -9,8 +9,10 @@
             "executor": "@nx/js:tsc",
             "options": {
                 "outputPath": "dist/apps/mmfv-backend",
-                "main": "apps/mmfv-backend/src/main.ts",
+                "main": "src/main.ts",
                 "tsConfig": "apps/mmfv-backend/tsconfig.json",
+                "rootDir": ".",
+                "outputFileName": "apps/mmfv-backend/src/main.js",
                 "generatePackageJson": true
             },
             "outputs": ["{options.outputPath}"]

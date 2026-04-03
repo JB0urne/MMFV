@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Put,
+    Body,
+    Param,
+    HttpCode,
+    HttpStatus,
+    NotFoundException,
+} from '@nestjs/common';
+import { Movie } from '@mmfv/interfaces';
 import { MoviesService } from './movies.service';
 
 @Controller('movies')
@@ -16,24 +27,15 @@ export class MoviesController {
         return this.moviesService.findAll();
     }
 
-    @Get('year/:year')
-    async findByYear(@Param('year') year: string) {
-        return this.moviesService.findByYear(parseInt(year, 10));
-    }
-
-    @Get(':imdbId')
-    async findOne(@Param('imdbId') imdbId: string) {
-        return this.moviesService.findOne(imdbId);
-    }
-
-    @Put(':imdbId')
-    async update(@Param('imdbId') imdbId: string, @Body() updateMovieDto: Partial<{ title: string; year: number }>) {
-        return this.moviesService.update(imdbId, updateMovieDto);
-    }
-
-    @Delete(':imdbId')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async remove(@Param('imdbId') imdbId: string) {
-        return this.moviesService.remove(imdbId);
+    @Put(':id')
+    async update(
+        @Param('id') id: string,
+        @Body() updateMovieDto: Partial<Movie>,
+    ) {
+        const updated = this.moviesService.update(id, updateMovieDto);
+        if (!updated) {
+            throw new NotFoundException(`Movie with id ${id} not found`);
+        }
+        return updated;
     }
 }

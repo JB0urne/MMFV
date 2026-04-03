@@ -29,4 +29,14 @@ export class MoviesService {
             }),
         );
     }
+
+    updateMovie(id: string, movie: Partial<Movie>): Observable<Movie> {
+        const url = `${this.endpointUrl}/${encodeURIComponent(id)}`;
+        return this.http.put<Movie>(url, movie).pipe(
+            catchError(error => {
+                console.error('Error updating movie:', error);
+                throw error;
+            }),
+        );
+    }
 }

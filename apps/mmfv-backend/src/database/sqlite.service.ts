@@ -1,26 +1,9 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 // CommonJS export: default import compiles to `.default` and breaks with webpack externals.
 import Database = require('better-sqlite3');
+import { Movie } from '@mmfv/interfaces';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
-
-export interface MovieRow {
-    _id: string;
-    title: string;
-    imdbId: string;
-    year: number;
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface SeedMovie {
-    _id: string;
-    title: string;
-    imdbId: string;
-    year: number;
-    createdAt: string;
-    updatedAt: string;
-}
 
 @Injectable()
 export class SqliteService implements OnModuleInit, OnModuleDestroy {
@@ -40,8 +23,8 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
                 title TEXT NOT NULL,
                 imdb_id TEXT NOT NULL UNIQUE,
                 year INTEGER NOT NULL,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
+                created_at TEXT,
+                updated_at TEXT
             )
         `);
         this.seedFromDumpIfEmpty();
@@ -60,20 +43,20 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         if (!seedPath || !existsSync(seedPath)) {
             return;
         }
-        const raw = JSON.parse(readFileSync(seedPath, 'utf-8')) as SeedMovie[];
+        const raw = JSON.parse(readFileSync(seedPath, 'utf-8')) as Movie[];
         const insert = this.db.prepare(
             `INSERT INTO movies (id, title, imdb_id, year, created_at, updated_at)
              VALUES (@id, @title, @imdb_id, @year, @created_at, @updated_at)`,
         );
-        const tx = this.db.transaction((rows: SeedMovie[]) => {
+        const tx = this.db.transaction((rows: Movie[]) => {
             for (const r of rows) {
                 insert.run({
                     id: r._id,
                     title: r.title,
                     imdb_id: r.imdbId,
                     year: r.year,
-                    created_at: r.createdAt,
-                    updated_at: r.updatedAt,
+                    created_at: r.createdAt ?? null,
+                    updated_at: r.updatedAt ?? null,
                 });
             }
         });
@@ -101,9 +84,9 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         title: string;
         imdb_id: string;
         year: number;
-        created_at: string;
-        updated_at: string;
-    }): MovieRow {
+        created_at: string | null;
+        updated_at: string | null;
+    }): Movie {
         return {
             _id: row.id,
             title: row.title,
