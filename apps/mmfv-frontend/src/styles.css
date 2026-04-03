@@ -256,8 +256,9 @@ body {
     color: #555;
 }
 
-.app-container button,
-.card button {
+/* Icon buttons (e.g. mat-paginator nav) must not inherit filled “primary” styling */
+.app-container button:not(.mat-mdc-icon-button),
+.card button:not(.mat-mdc-icon-button) {
     background-color: #007acc;
     color: white;
     border: none;
@@ -269,13 +270,13 @@ body {
     transition: background-color 0.3s;
 }
 
-.app-container button:hover:not(:disabled),
-.card button:hover:not(:disabled) {
+.app-container button:not(.mat-mdc-icon-button):hover:not(:disabled),
+.card button:not(.mat-mdc-icon-button):hover:not(:disabled) {
     background-color: #005a9e;
 }
 
-.app-container button:disabled,
-.card button:disabled {
+.app-container button:not(.mat-mdc-icon-button):disabled,
+.card button:not(.mat-mdc-icon-button):disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
