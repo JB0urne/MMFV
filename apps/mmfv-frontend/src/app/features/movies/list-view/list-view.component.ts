@@ -22,6 +22,7 @@ export class ListViewComponent {
 
     @Output() pageChange = new EventEmitter<PageEvent>();
     @Output() addRandomMovie = new EventEmitter<void>();
+    @Output() editMovie = new EventEmitter<Movie>();
 
     onPageChange(event: PageEvent) {
         this.pageChange.emit(event);
@@ -29,5 +30,9 @@ export class ListViewComponent {
 
     onAddRandomMovie() {
         this.addRandomMovie.emit();
+    }
+
+    onEditMovie(movie: Movie) {
+        this.editMovie.emit(movie);
     }
 }
