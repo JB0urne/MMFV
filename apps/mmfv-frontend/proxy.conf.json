@@ -1,8 +1,8 @@
 {
-    "/api/*": {
+    "/api/**": {
         "target": "http://localhost:3000",
         "secure": false,
-        "logLevel": "info",
+        "logLevel": "debug",
         "changeOrigin": true,
         "timeout": 10000,
         "onError": "error"

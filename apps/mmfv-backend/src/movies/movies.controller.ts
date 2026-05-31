@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { Movie } from '@mmfv/interfaces';
 import { MoviesService } from './movies.service';
-import { of } from 'rxjs';
 
 @Controller('movies')
 export class MoviesController {
@@ -25,7 +24,6 @@ export class MoviesController {
 
     @Get()
     async getMovies() {
-        console.warn('getMovies');
         return this.moviesService.findAll();
 
     }
@@ -35,15 +33,10 @@ export class MoviesController {
         @Param('id') id: string,
         @Body() updateMovieDto: Partial<Movie>,
     ) {
-        console.warn('updateMovieDto:');
-        // const updated = this.moviesService.update(id, updateMovieDto);
-        // if (!updated) {
-        //     throw new NotFoundException(`Movie with id ${id} not found`);
-        // }
-        // return updated;
-        return of({
-            _id: '123',
-            ...updateMovieDto,
-        });
+        const updated = this.moviesService.update(id, updateMovieDto);
+        if (!updated) {
+            throw new NotFoundException(`Movie with id ${id} not found`);
+        }
+        return updated;
     }
 }
