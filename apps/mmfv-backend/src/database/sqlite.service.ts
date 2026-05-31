@@ -1,7 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 // CommonJS export: default import compiles to `.default` and breaks with webpack externals.
 import Database = require('better-sqlite3');
-import { Movie } from '@mmfv/interfaces';
+import { Movie, StrictMovie } from '@mmfv/interfaces';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 
@@ -43,20 +43,20 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         if (!seedPath || !existsSync(seedPath)) {
             return;
         }
-        const raw = JSON.parse(readFileSync(seedPath, 'utf-8')) as Movie[];
+        const raw = JSON.parse(readFileSync(seedPath, 'utf-8')) as StrictMovie[];
         const insert = this.db.prepare(
             `INSERT INTO movies (id, title, imdb_id, year, created_at, updated_at)
              VALUES (@id, @title, @imdb_id, @year, @created_at, @updated_at)`,
         );
-        const tx = this.db.transaction((rows: Movie[]) => {
+        const tx = this.db.transaction((rows: StrictMovie[]) => {
             for (const r of rows) {
                 insert.run({
-                    id: r._id,
+                    id: r.id,
                     title: r.title,
                     imdb_id: r.imdbId,
                     year: r.year,
-                    created_at: r.createdAt ?? null,
-                    updated_at: r.updatedAt ?? null,
+                    created_at: r.createdAt,
+                    updated_at: r.updatedAt,
                 });
             }
         });
@@ -88,12 +88,12 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         updated_at: string | null;
     }): Movie {
         return {
-            _id: row.id,
+            id: row.id,
             title: row.title,
             imdbId: row.imdb_id,
             year: row.year,
-            createdAt: row.created_at,
-            updatedAt: row.updated_at,
+            ...(row.created_at != null ? { createdAt: row.created_at } : {}),
+            ...(row.updated_at != null ? { updatedAt: row.updated_at } : {}),
         };
     }
 }

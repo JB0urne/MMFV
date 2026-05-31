@@ -44,8 +44,8 @@ export class MoviesService {
             return null;
         }
         const title = updateMovieDto.title ?? existing.title;
-        const imdbId = updateMovieDto.imdbId ?? existing.imdbId;
-        const year = updateMovieDto.year ?? existing.year;
+        const imdbId = updateMovieDto.imdbId ?? existing.imdbId ?? '';
+        const year = updateMovieDto.year ?? existing.year ?? 0;
         const now = new Date().toISOString();
         this.sqlite.database
             .prepare(

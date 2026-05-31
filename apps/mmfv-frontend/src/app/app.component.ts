@@ -136,11 +136,11 @@ export class AppComponent implements OnInit {
             }
             console.log('Result:', result);
             this.moviesService
-                .updateMovie(movie._id, result)
+                .updateMovie(movie.id, result)
                 .pipe(
                     tap(updated => {
                         const movies = this.moviesSubject.value;
-                        const idx = movies.findIndex(m => m._id === updated._id);
+                        const idx = movies.findIndex(m => m.id === updated.id);
                         if (idx >= 0) {
                             const next = [...movies];
                             next[idx] = updated;
