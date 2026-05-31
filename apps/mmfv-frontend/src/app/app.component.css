@@ -1,3 +1,8 @@
+:host {
+    display: block;
+    padding-top: var(--header-total-height);
+}
+
 .container {
     max-width: 800px;
     margin: 0 auto;

@@ -2,6 +2,15 @@
 @import '@angular/material/prebuilt-themes/azure-blue.css';
 
 /* Global Styles */
+:root {
+    --header-bar-height: 55px;
+    --logo-protrusion-bottom: 34px;
+    --logo-protrusion-top: 11px;
+    --header-total-height: calc(
+        var(--header-bar-height) + var(--logo-protrusion-bottom) + var(--logo-protrusion-top)
+    );
+}
+
 * {
     box-sizing: border-box;
 }
