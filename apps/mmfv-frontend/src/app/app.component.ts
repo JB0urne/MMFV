@@ -131,12 +131,15 @@ export class AppComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (!result) {
-                console.log('No result');
                 return;
             }
-            console.log('Result:', result);
+            const updatedMovie: Movie = {
+                ...movie,
+                title: result.title,
+                year: result.year,
+            };
             this.moviesService
-                .updateMovie(movie.id, result)
+                .updateMovie(movie.id, updatedMovie)
                 .pipe(
                     tap(updated => {
                         const movies = this.moviesSubject.value;

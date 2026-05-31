@@ -30,7 +30,7 @@ export class MoviesService {
         );
     }
 
-    updateMovie(id: string, movie: Partial<Movie>): Observable<Movie> {
+    updateMovie(id: string, movie: Movie): Observable<Movie> {
         const url = `${this.endpointUrl}/${encodeURIComponent(id)}`;
         return this.http.put<Movie>(url, movie).pipe(
             catchError(error => {

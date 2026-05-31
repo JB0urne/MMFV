@@ -35,23 +35,17 @@ export class MoviesService {
         return rows.map((r) => this.sqlite.rowToMovie(r));
     }
 
-    update(
-        id: string,
-        updateMovieDto: Partial<Movie>,
-    ): Movie | null {
+    update(id: string, movie: Movie): Movie | null {
         const existing = this.findOneById(id);
         if (!existing) {
             return null;
         }
-        const title = updateMovieDto.title ?? existing.title;
-        const imdbId = updateMovieDto.imdbId ?? existing.imdbId ?? '';
-        const year = updateMovieDto.year ?? existing.year ?? 0;
         const now = new Date().toISOString();
         this.sqlite.database
             .prepare(
                 `UPDATE movies SET title = ?, imdb_id = ?, year = ?, updated_at = ? WHERE id = ?`,
             )
-            .run(title, imdbId, year, now, id);
+            .run(movie.title, movie.imdbId ?? '', movie.year ?? 0, now, id);
         return this.findOneById(id);
     }
 

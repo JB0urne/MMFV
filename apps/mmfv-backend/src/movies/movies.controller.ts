@@ -31,9 +31,9 @@ export class MoviesController {
     @Put(':id')
     async update(
         @Param('id') id: string,
-        @Body() updateMovieDto: Partial<Movie>,
+        @Body() movie: Movie,
     ) {
-        const updated = this.moviesService.update(id, updateMovieDto);
+        const updated = this.moviesService.update(id, movie);
         if (!updated) {
             throw new NotFoundException(`Movie with id ${id} not found`);
         }
