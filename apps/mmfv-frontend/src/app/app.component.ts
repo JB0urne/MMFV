@@ -97,7 +97,7 @@ export class AppComponent implements OnInit {
         ];
 
         const randomTitle = randomTitles[Math.floor(Math.random() * randomTitles.length)];
-        const randomYear = Math.floor(Math.random() * (2024 - 1950 + 1)) + 1950;
+        const randomYear = Math.floor(1950 + 75 * Math.random());
         const randomImdbId = `tt${Math.floor(Math.random() * 9000000 + 1000000)}`;
 
         const newMovie = {
