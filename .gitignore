@@ -9,3 +9,4 @@ tmp/
 # Local SQLite (development)
 /data/
 
+.env
