@@ -35,13 +35,25 @@ MMFV (Movie Master Filme Verzeichnis) is a movie catalog: list, paginate, create
 └── package.json            # Root deps; `npm run app` starts both apps
 ```
 
-## Commands
+## Agent dev workflow
+
+**Agents must not run `npm install` or start dev servers.** Ask the user to install/remove packages manually. To verify changes, run lint/format checks and builds only — never `npm run app`, `nx serve`, or `ng serve`.
+
+| Allowed | Not allowed |
+| --- | --- |
+| `nx build frontend` / `nx build mmfv-backend` | `npm install`, `npm ci`, package add/remove |
+| `nx lint <project>` | `npm run app`, `nx serve`, `ng serve` |
+| `npx prettier --check .` | Starting apps to smoke-test unless user asks |
+
+Cursor rule: `.cursor/rules/agent-dev-workflow.mdc` (always applied).
+
+## Commands (for humans)
 
 ```bash
-npm install                 # Install all dependencies (run from root)
-npm run app                 # Serve frontend + backend in parallel
-nx serve frontend           # Angular dev server → :4200
-nx serve mmfv-backend       # NestJS API → :3000
+npm install                 # Install all dependencies (run from root; agents: ask user instead)
+npm run app                 # Serve frontend + backend in parallel (humans only)
+nx serve frontend           # Angular dev server → :4200 (humans only)
+nx serve mmfv-backend       # NestJS API → :3000 (humans only)
 nx build frontend
 nx build mmfv-backend
 ```
@@ -75,6 +87,7 @@ Register a new alias whenever you add a library.
 | HTTP client for movies | `libs/frontend/data-access/movies` |
 | Movie types | `libs/shared/interfaces/src/lib/movies/` |
 | REST endpoints | `apps/mmfv-backend/src/movies/` |
+| TMDB search proxy | `apps/mmfv-backend/src/tmdb/` |
 | SQLite schema / seed | `apps/mmfv-backend/src/database/sqlite.service.ts` |
 
 ## Nx project names

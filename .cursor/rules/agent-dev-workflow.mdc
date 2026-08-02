@@ -1,0 +1,28 @@
+---
+description: Agent shell workflow — no install, no serve; ask user for packages
+alwaysApply: true
+---
+
+# Agent dev workflow (MMFV)
+
+## Do not run
+
+- `npm install`, `npm ci`, `npm uninstall`, or any package add/remove command
+- `npm run app`, `nx serve`, `ng serve`, or any dev-server / long-running app start
+- Docker compose up for local app testing unless the user explicitly asks
+
+When dependencies change, **tell the user** what to install or remove and let them run it manually.
+
+## Allowed verification
+
+- **Lint:** `nx lint <project>` (e.g. `interfaces`, `frontend-data-access-movies`)
+- **Format check:** `npx prettier --check .` (or `--write` only if the user asked to format)
+- **Build (when needed):** `nx build frontend`, `nx build mmfv-backend`, or `npx tsc -p apps/mmfv-backend/tsconfig.json --noEmit`
+- **Typecheck** via build/tsc — not by serving apps
+
+## Prefer
+
+- Static analysis over runtime checks
+- Asking the user to run `npm run app` or manual smoke tests when behavior needs verification in a browser
+
+See also `AGENTS.md` at the repo root.
