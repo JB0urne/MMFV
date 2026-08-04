@@ -4,7 +4,7 @@ A TypeScript monorepo for browsing and managing a movie catalog. An **Angular** 
 
 ## Purpose
 
-MMFV lets you list, paginate, create, and edit movies. Shared types live in libraries so the frontend and backend stay aligned. On first run, the backend seeds an empty database from `seed/movies.json`.
+MMFV (german: "MovieMasterFilmeVerzeichnis", a term created when I was much younger) lets you explore movies and mangane movie lists.
 
 ## Tech stack
 
@@ -14,7 +14,6 @@ MMFV lets you list, paginate, create, and edit movies. Shared types live in libr
 | Frontend | Angular 20, Angular Material, RxJS |
 | Backend | NestJS 10, Express |
 | Database | SQLite via `better-sqlite3` |
-| Shared code | TypeScript path aliases under `libs/` |
 
 ## Prerequisites
 
@@ -37,7 +36,6 @@ npm run app
 | Frontend | http://localhost:4200 | `frontend` |
 | Backend API | http://localhost:3000/api | `mmfv-backend` |
 
-The frontend dev server proxies `/api/**` to the backend (`apps/mmfv-frontend/proxy.conf.json`).
 
 ### Run apps separately
 
@@ -75,7 +73,16 @@ nx build mmfv-backend
 
 ## Environment
 
-Copy `example.env` as a starting point for local overrides. The SQLite database file is gitignored under `/data/`.
+Copy `example.env` to `.env` in the repo root and set every value; **all listed variables are required** (no code defaults).
+
+| Variable | Purpose |
+| --- | --- |
+| `BACKEND_PORT` | Backend HTTP listen port |
+| `SQLITE_PATH` | SQLite database file path |
+| `SQLITE_SEED_FILE` | Seed JSON path (used when the DB is empty) |
+| `TMDB_API_KEY` | TMDB API Read Access Token (Bearer token) |
+
+The frontend never reads TMDB credentials — all TMDB calls go through the backend.
 
 ## API overview
 
@@ -83,7 +90,9 @@ Copy `example.env` as a starting point for local overrides. The SQLite database 
 | --- | --- | --- |
 | `GET` | `/api/movies` | List all movies |
 | `POST` | `/api/movies` | Create a movie |
+| `POST` | `/api/movies/from-tmdb` | Import a movie from TMDB by `{ tmdbId }` |
 | `PUT` | `/api/movies/:id` | Update a movie |
+| `GET` | `/api/tmdb/search/movie?query=` | Search TMDB (proxied, camelCase response) |
 
 ## Agent documentation
 
