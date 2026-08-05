@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SqliteModule } from './database/sqlite.module';
 import { MoviesModule } from './movies/movies.module';
 
 @Module({
-    imports: [SqliteModule, MoviesModule],
+    imports: [
+        ConfigModule.forRoot({isGlobal: true}),
+        SqliteModule,
+        MoviesModule,
+    ],
     controllers: [AppController],
     providers: [AppService],
 })

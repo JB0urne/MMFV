@@ -1,20 +1,23 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 // CommonJS export: default import compiles to `.default` and breaks with webpack externals.
 import Database = require('better-sqlite3');
 import { Movie, StrictMovie } from '@mmfv/interfaces';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 
 @Injectable()
 export class SqliteService implements OnModuleInit, OnModuleDestroy {
     private db!: Database.Database;
+
+    constructor(private readonly configService: ConfigService) {}
 
     get database(): Database.Database {
         return this.db;
     }
 
     onModuleInit(): void {
-        const dbPath = process.env.SQLITE_PATH || join(process.cwd(), 'data', 'mmfv.sqlite');
+        const dbPath = this.requireEnv('SQLITE_PATH');
         mkdirSync(dirname(dbPath), { recursive: true });
         this.db = new Database(dbPath);
         this.db.exec(`
@@ -39,9 +42,9 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         if (count.c > 0) {
             return;
         }
-        const seedPath = this.resolveSeedPath();
-        if (!seedPath || !existsSync(seedPath)) {
-            return;
+        const seedPath = this.requireEnv('SQLITE_SEED_FILE');
+        if (!existsSync(seedPath)) {
+            throw new Error(`SQLITE_SEED_FILE does not exist: ${seedPath}`);
         }
         const raw = JSON.parse(readFileSync(seedPath, 'utf-8')) as StrictMovie[];
         const insert = this.db.prepare(
@@ -63,20 +66,12 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         tx(raw);
     }
 
-    private resolveSeedPath(): string | null {
-        if (process.env.SQLITE_SEED_FILE) {
-            return process.env.SQLITE_SEED_FILE;
+    private requireEnv(key: string): string {
+        const value = this.configService.get<string>(key)?.trim();
+        if (!value) {
+            throw new Error(`${key} is required. Copy example.env to .env and set it.`);
         }
-        const candidates = [
-            join(process.cwd(), 'seed', 'movies.json'),
-            join(process.cwd(), '..', '..', 'seed', 'movies.json'),
-        ];
-        for (const p of candidates) {
-            if (existsSync(p)) {
-                return p;
-            }
-        }
-        return null;
+        return value;
     }
 
     rowToMovie(row: {
