@@ -1,8 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-// CommonJS export: default import compiles to `.default` and breaks with webpack externals.
-import Database = require('better-sqlite3');
 import { Movie, StrictMovie } from '@mmfv/interfaces';
+import Database from 'better-sqlite3';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { dirname } from 'path';
 
