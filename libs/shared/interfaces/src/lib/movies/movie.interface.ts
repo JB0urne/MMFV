@@ -4,10 +4,10 @@ export interface BaseMovie {
 }
 
 export interface Movie extends BaseMovie {
-    imdbId?: string;
+    tmdbId?: number;
     year?: number;
     createdAt?: string;
     updatedAt?: string;
 }
 
-export type StrictMovie = Required<Movie>
+export type StrictMovie = Required<Movie>;

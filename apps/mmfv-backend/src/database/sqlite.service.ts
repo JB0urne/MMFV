@@ -21,7 +21,7 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
             CREATE TABLE IF NOT EXISTS movies (
                 id TEXT PRIMARY KEY,
                 title TEXT NOT NULL,
-                imdb_id TEXT NOT NULL UNIQUE,
+                tmdb_id INTEGER NOT NULL UNIQUE,
                 year INTEGER NOT NULL,
                 created_at TEXT,
                 updated_at TEXT
@@ -45,15 +45,15 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         }
         const raw = JSON.parse(readFileSync(seedPath, 'utf-8')) as StrictMovie[];
         const insert = this.db.prepare(
-            `INSERT INTO movies (id, title, imdb_id, year, created_at, updated_at)
-             VALUES (@id, @title, @imdb_id, @year, @created_at, @updated_at)`,
+            `INSERT INTO movies (id, title, tmdb_id, year, created_at, updated_at)
+             VALUES (@id, @title, @tmdb_id, @year, @created_at, @updated_at)`,
         );
         const tx = this.db.transaction((rows: StrictMovie[]) => {
             for (const r of rows) {
                 insert.run({
                     id: r.id,
                     title: r.title,
-                    imdb_id: r.imdbId,
+                    tmdb_id: r.tmdbId,
                     year: r.year,
                     created_at: r.createdAt,
                     updated_at: r.updatedAt,
@@ -82,7 +82,7 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
     rowToMovie(row: {
         id: string;
         title: string;
-        imdb_id: string;
+        tmdb_id: number;
         year: number;
         created_at: string | null;
         updated_at: string | null;
@@ -90,7 +90,7 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         return {
             id: row.id,
             title: row.title,
-            imdbId: row.imdb_id,
+            tmdbId: row.tmdb_id,
             year: row.year,
             ...(row.created_at != null ? { createdAt: row.created_at } : {}),
             ...(row.updated_at != null ? { updatedAt: row.updated_at } : {}),

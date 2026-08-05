@@ -7,27 +7,27 @@ import { SqliteService } from '../database/sqlite.service';
 export class MoviesService {
     constructor(private readonly sqlite: SqliteService) {}
 
-    create(createMovieDto: { title: string; imdbId: string; year: number }): Movie {
+    create(createMovieDto: { title: string; tmdbId: number; year: number }): Movie {
         const now = new Date().toISOString();
         const id = randomUUID();
         this.sqlite.database
             .prepare(
-                `INSERT INTO movies (id, title, imdb_id, year, created_at, updated_at)
+                `INSERT INTO movies (id, title, tmdb_id, year, created_at, updated_at)
                  VALUES (?, ?, ?, ?, ?, ?)`,
             )
-            .run(id, createMovieDto.title, createMovieDto.imdbId, createMovieDto.year, now, now);
-        return this.findOneByImdbId(createMovieDto.imdbId) as Movie;
+            .run(id, createMovieDto.title, createMovieDto.tmdbId, createMovieDto.year, now, now);
+        return this.findOneByTmdbId(createMovieDto.tmdbId) as Movie;
     }
 
     findAll(): Movie[] {
         const rows = this.sqlite.database
             .prepare(
-                `SELECT id, title, imdb_id, year, created_at, updated_at FROM movies ORDER BY title`,
+                `SELECT id, title, tmdb_id, year, created_at, updated_at FROM movies ORDER BY title`,
             )
             .all() as Array<{
             id: string;
             title: string;
-            imdb_id: string;
+            tmdb_id: number;
             year: number;
             created_at: string | null;
             updated_at: string | null;
@@ -43,22 +43,22 @@ export class MoviesService {
         const now = new Date().toISOString();
         this.sqlite.database
             .prepare(
-                `UPDATE movies SET title = ?, imdb_id = ?, year = ?, updated_at = ? WHERE id = ?`,
+                `UPDATE movies SET title = ?, tmdb_id = ?, year = ?, updated_at = ? WHERE id = ?`,
             )
-            .run(movie.title, movie.imdbId ?? '', movie.year ?? 0, now, id);
+            .run(movie.title, movie.tmdbId ?? 0, movie.year ?? 0, now, id);
         return this.findOneById(id);
     }
 
     private findOneById(id: string): Movie | null {
         const row = this.sqlite.database
             .prepare(
-                `SELECT id, title, imdb_id, year, created_at, updated_at FROM movies WHERE id = ?`,
+                `SELECT id, title, tmdb_id, year, created_at, updated_at FROM movies WHERE id = ?`,
             )
             .get(id) as
             | {
                   id: string;
                   title: string;
-                  imdb_id: string;
+                  tmdb_id: number;
                   year: number;
                   created_at: string | null;
                   updated_at: string | null;
@@ -67,16 +67,16 @@ export class MoviesService {
         return row ? this.sqlite.rowToMovie(row) : null;
     }
 
-    private findOneByImdbId(imdbId: string): Movie | null {
+    private findOneByTmdbId(tmdbId: number): Movie | null {
         const row = this.sqlite.database
             .prepare(
-                `SELECT id, title, imdb_id, year, created_at, updated_at FROM movies WHERE imdb_id = ?`,
+                `SELECT id, title, tmdb_id, year, created_at, updated_at FROM movies WHERE tmdb_id = ?`,
             )
-            .get(imdbId) as
+            .get(tmdbId) as
             | {
                   id: string;
                   title: string;
-                  imdb_id: string;
+                  tmdb_id: number;
                   year: number;
                   created_at: string | null;
                   updated_at: string | null;

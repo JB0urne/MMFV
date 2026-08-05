@@ -2,7 +2,7 @@
     {
         "id": "507f1f77bcf86cd799439011",
         "title": "The Matrix",
-        "imdbId": "tt0133093",
+        "tmdbId": 603,
         "year": 1999,
         "createdAt": "2024-01-01T00:00:00.000Z",
         "updatedAt": "2024-01-01T00:00:00.000Z"
@@ -10,7 +10,7 @@
     {
         "id": "507f1f77bcf86cd799439012",
         "title": "Inception",
-        "imdbId": "tt1375666",
+        "tmdbId": 27205,
         "year": 2010,
         "createdAt": "2024-01-01T00:00:00.000Z",
         "updatedAt": "2024-01-01T00:00:00.000Z"
@@ -18,7 +18,7 @@
     {
         "id": "507f1f77bcf86cd799439013",
         "title": "The Dark Knight",
-        "imdbId": "tt0468569",
+        "tmdbId": 155,
         "year": 2008,
         "createdAt": "2024-01-01T00:00:00.000Z",
         "updatedAt": "2024-01-01T00:00:00.000Z"
@@ -26,7 +26,7 @@
     {
         "id": "507f1f77bcf86cd799439014",
         "title": "Pulp Fiction",
-        "imdbId": "tt0110912",
+        "tmdbId": 680,
         "year": 1994,
         "createdAt": "2024-01-01T00:00:00.000Z",
         "updatedAt": "2024-01-01T00:00:00.000Z"
@@ -34,7 +34,7 @@
     {
         "id": "507f1f77bcf86cd799439015",
         "title": "Fight Club",
-        "imdbId": "tt0137523",
+        "tmdbId": 550,
         "year": 1999,
         "createdAt": "2024-01-01T00:00:00.000Z",
         "updatedAt": "2024-01-01T00:00:00.000Z"

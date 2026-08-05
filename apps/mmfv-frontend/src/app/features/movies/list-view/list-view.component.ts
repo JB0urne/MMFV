@@ -18,7 +18,7 @@ export class ListViewComponent {
     @Input() totalMovies$!: Observable<number>;
     @Input() pageSize$!: Observable<number>;
     @Input() pageIndex$!: Observable<number>;
-    @Input() displayedColumns: string[] = ['title', 'imdbId', 'year'];
+    @Input() displayedColumns: string[] = ['title', 'tmdbId', 'year'];
 
     @Output() pageChange = new EventEmitter<PageEvent>();
     @Output() addRandomMovie = new EventEmitter<void>();

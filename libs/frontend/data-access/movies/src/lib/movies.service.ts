@@ -21,7 +21,7 @@ export class MoviesService {
         );
     }
 
-    createMovie(movie: { title: string; imdbId: string; year: number }): Observable<Movie> {
+    createMovie(movie: { title: string; tmdbId: number; year: number }): Observable<Movie> {
         return this.http.post<Movie>(this.endpointUrl, movie).pipe(
             catchError(error => {
                 console.error('Error creating movie:', error);

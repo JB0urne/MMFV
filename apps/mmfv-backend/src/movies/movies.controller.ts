@@ -18,7 +18,7 @@ export class MoviesController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    async create(@Body() createMovieDto: { title: string; imdbId: string; year: number }) {
+    async create(@Body() createMovieDto: { title: string; tmdbId: number; year: number }) {
         return this.moviesService.create(createMovieDto);
     }
 

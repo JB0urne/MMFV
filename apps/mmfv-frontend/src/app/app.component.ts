@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
     title = 'MMFV';
     angularVersion = '21';
 
-    displayedColumns: string[] = ['title', 'imdbId', 'year', 'actions'];
+    displayedColumns: string[] = ['title', 'tmdbId', 'year', 'actions'];
 
     // Pagination state
     private pageSizeSubject = new BehaviorSubject<number>(10);
@@ -98,11 +98,11 @@ export class AppComponent implements OnInit {
 
         const randomTitle = randomTitles[Math.floor(Math.random() * randomTitles.length)];
         const randomYear = Math.floor(1950 + 75 * Math.random());
-        const randomImdbId = `tt${Math.floor(Math.random() * 9000000 + 1000000)}`;
+        const randomTmdbId = Math.floor(Math.random() * 9000000 + 1000000);
 
         const newMovie = {
             title: randomTitle,
-            imdbId: randomImdbId,
+            tmdbId: randomTmdbId,
             year: randomYear,
         };
 
