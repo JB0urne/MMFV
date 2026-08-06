@@ -107,7 +107,7 @@ export class AppComponent implements OnInit {
         };
 
         this.moviesService
-            .createMovie(newMovie)
+            .addMovie(newMovie)
             .pipe(
                 tap(() => {
                     this.loadMovies();

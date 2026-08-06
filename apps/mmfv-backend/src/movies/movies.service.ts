@@ -7,7 +7,7 @@ import { SqliteService } from '../database/sqlite.service';
 export class MoviesService {
     constructor(private readonly sqlite: SqliteService) {}
 
-    create(createMovieDto: { title: string; tmdbId: number; year: number }): Movie {
+    add(createMovieDto: { title: string; tmdbId: number; year: number }): Movie {
         const now = new Date().toISOString();
         const id = randomUUID();
         this.sqlite.database
