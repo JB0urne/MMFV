@@ -18,8 +18,14 @@ export class MoviesController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    async add(@Body() createMovieDto: { title: string; tmdbId: number; year: number }) {
-        return this.moviesService.add(createMovieDto);
+    async add(@Body() movie: Movie) {
+        return this.moviesService.add(movie);
+    }
+
+    @Post('from-tmdb')
+    @HttpCode(HttpStatus.CREATED)
+    async addByTmdbId(@Body() body: { tmdbId: number }) {
+        return this.moviesService.addByTmdbId(body.tmdbId);
     }
 
     @Get()

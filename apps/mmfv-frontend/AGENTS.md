@@ -17,4 +17,4 @@ This app composes features and app-only UI. Reusable Angular code → `libs/fron
 - Standalone components; Angular Material; shared types via `@mmfv/interfaces`.
 - Data access: `@mmfv/frontend/data-access/movies` (`MoviesService`, `TmdbService`).
 - HTTP: relative `/api/...` only. Proxy: `proxy.conf.json` → `http://localhost:3000`.
-- TMDB: search/add via backend (`TmdbService`, `createFromTmdb`). **No TMDB tokens or direct TMDB URLs in the frontend.**
+- TMDB: search/add via backend (`TmdbService`, `addByTmdbId`). **No TMDB tokens or direct TMDB URLs in the frontend.**

@@ -2,21 +2,35 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Movie } from '@mmfv/interfaces';
 import { SqliteService } from '../database/sqlite.service';
+import { TmdbService } from '../tmdb/tmdb.service';
 
 @Injectable()
 export class MoviesService {
-    constructor(private readonly sqlite: SqliteService) {}
+    constructor(
+        private readonly sqlite: SqliteService,
+        private readonly tmdbService: TmdbService,
+    ) {}
 
-    add(createMovieDto: { title: string; tmdbId: number; year: number }): Movie {
+    add(movie: Movie): Movie {
         const now = new Date().toISOString();
         const id = randomUUID();
+        const tmdbId = movie.tmdbId ?? 0;
         this.sqlite.database
             .prepare(
                 `INSERT INTO movies (id, title, tmdb_id, year, created_at, updated_at)
                  VALUES (?, ?, ?, ?, ?, ?)`,
             )
-            .run(id, createMovieDto.title, createMovieDto.tmdbId, createMovieDto.year, now, now);
-        return this.findOneByTmdbId(createMovieDto.tmdbId) as Movie;
+            .run(id, movie.title, tmdbId, movie.year ?? 0, now, now);
+        return this.findOneByTmdbId(tmdbId) as Movie;
+    }
+
+    async addByTmdbId(tmdbId: number): Promise<Movie> {
+        const existingMovie = this.findOneByTmdbId(tmdbId);
+        if (existingMovie) {
+            return existingMovie;
+        }
+        const detailedMovie = await this.tmdbService.getMovie(tmdbId);
+        return this.add(detailedMovie);
     }
 
     findAll(): Movie[] {
@@ -32,7 +46,7 @@ export class MoviesService {
             created_at: string | null;
             updated_at: string | null;
         }>;
-        return rows.map((r) => this.sqlite.rowToMovie(r));
+        return rows.map(r => this.sqlite.rowToMovie(r));
     }
 
     update(id: string, movie: Movie): Movie | null {

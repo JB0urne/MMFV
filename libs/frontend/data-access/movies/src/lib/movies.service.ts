@@ -30,6 +30,15 @@ export class MoviesService {
         );
     }
 
+    addByTmdbId(tmdbId: number): Observable<Movie> {
+        return this.http.post<Movie>(`${this.endpointUrl}/from-tmdb`, { tmdbId }).pipe(
+            catchError(error => {
+                console.error('Error adding movie from TMDB:', error);
+                throw error;
+            }),
+        );
+    }
+
     updateMovie(id: string, movie: Movie): Observable<Movie> {
         const url = `${this.endpointUrl}/${encodeURIComponent(id)}`;
         return this.http.put<Movie>(url, movie).pipe(

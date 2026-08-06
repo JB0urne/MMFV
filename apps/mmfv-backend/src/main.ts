@@ -26,6 +26,7 @@ async function bootstrap() {
     await app.listen(port);
     console.log(`🚀 Server is running on http://localhost:${port}`);
     console.log(`🎬 Movies endpoint available at http://localhost:${port}/api/movies`);
+    console.log(`🔍 TMDB search available at http://localhost:${port}/api/tmdb/search/movie`);
 }
 
 bootstrap();

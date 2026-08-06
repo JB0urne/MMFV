@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MoviesService } from '@mmfv/frontend/data-access/movies';
 import { Movie } from '@mmfv/interfaces';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { catchError, map, take, tap } from 'rxjs/operators';
+import { catchError, finalize, map, take, tap } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
 import { WelcomeComponent } from './components/welcome/welcome.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -28,6 +28,8 @@ import { ListViewComponent } from './features/movies/list-view/list-view.compone
     styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
+    @ViewChild(ListViewComponent) listView?: ListViewComponent;
+
     title = 'MMFV';
     angularVersion = '21';
 
@@ -80,6 +82,24 @@ export class AppComponent implements OnInit {
     onPageChange(event: PageEvent) {
         this.pageIndexSubject.next(event.pageIndex);
         this.pageSizeSubject.next(event.pageSize);
+    }
+
+    onAddTmdbMovie(tmdbId: number) {
+        this.moviesService
+            .addByTmdbId(tmdbId)
+            .pipe(
+                tap(() => {
+                    this.loadMovies();
+                }),
+                catchError(error => {
+                    console.error('Error adding movie from TMDB:', error);
+                    return of(null);
+                }),
+                finalize(() => {
+                    this.listView?.clearAddingTmdbId();
+                }),
+            )
+            .subscribe();
     }
 
     addRandomMovie() {

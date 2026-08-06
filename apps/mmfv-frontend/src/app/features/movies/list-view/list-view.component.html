@@ -1,6 +1,68 @@
 <div class="card">
     <h2>Movies</h2>
-    <button mat-raised-button color="primary" (click)="onAddRandomMovie()" style="margin-bottom: 16px;">
+
+    <section class="search-section">
+        <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search TMDB</mat-label>
+            <input
+                matInput
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="onSearchQueryChange()"
+                placeholder="Search by title…"
+            />
+        </mat-form-field>
+
+        @if (searchLoading) {
+            <div class="search-status">
+                <mat-spinner diameter="24"></mat-spinner>
+                <span>Searching…</span>
+            </div>
+        }
+
+        @if (searchError) {
+            <p class="search-error">{{ searchError }}</p>
+        }
+
+        @if (!searchLoading && searchQuery.trim() && searchResults.length === 0 && !searchError) {
+            <p class="search-empty">No TMDB results for "{{ searchQuery.trim() }}".</p>
+        }
+
+        @if (searchResults.length > 0) {
+            <ul class="search-results">
+                @for (result of searchResults; track result.id) {
+                    <li class="search-result">
+                        <div class="search-result-info">
+                            <strong>{{ result.title }}</strong>
+                            <span class="search-result-meta">
+                                {{ releaseYear(result.releaseDate) }}
+                                @if (result.originalTitle !== result.title) {
+                                    · {{ result.originalTitle }}
+                                }
+                            </span>
+                            @if (result.overview) {
+                                <p class="search-result-overview">{{ result.overview }}</p>
+                            }
+                        </div>
+                        <button
+                            mat-stroked-button
+                            color="primary"
+                            type="button"
+                            [disabled]="addingTmdbId === result.id"
+                            (click)="onAddTmdbMovie(result)"
+                        >
+                            @if (addingTmdbId === result.id) {
+                                Adding…
+                            } @else {
+                                Add
+                            }
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <button mat-raised-button color="primary" (click)="onAddRandomMovie()" class="add-random-btn">
         Add Random Movie
     </button>
 

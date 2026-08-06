@@ -7,7 +7,7 @@ NestJS + SQLite API. Nx name: **`mmfv-backend`**. Global prefix `/api`. Update w
 | Method | Path | Notes |
 | --- | --- | --- |
 | `GET` | `/api/movies` | `Movie[]` |
-| `POST` | `/api/movies` | `{ title, tmdbId, year }` |
+| `POST` | `/api/movies` | `Movie` body (`id` assigned server-side) |
 | `POST` | `/api/movies/from-tmdb` | `{ tmdbId: number }` |
 | `PUT` | `/api/movies/:id` | `Movie` body |
 | `GET` | `/api/tmdb/search/movie` | `?query=&page=` → `MovieTmdbSearchResponse` |
