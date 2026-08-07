@@ -14,14 +14,13 @@ export class MoviesService {
     add(movie: Movie): Movie {
         const now = new Date().toISOString();
         const id = randomUUID();
-        const tmdbId = movie.tmdbId ?? 0;
         this.sqlite.database
             .prepare(
                 `INSERT INTO movies (id, title, tmdb_id, year, created_at, updated_at)
                  VALUES (?, ?, ?, ?, ?, ?)`,
             )
-            .run(id, movie.title, tmdbId, movie.year ?? 0, now, now);
-        return this.findOneByTmdbId(tmdbId) as Movie;
+            .run(id, movie.title, movie.tmdbId ?? null, movie.year ?? null, now, now);
+        return this.findOneById(id) as Movie;
     }
 
     async addByTmdbId(tmdbId: number): Promise<Movie> {
@@ -41,8 +40,8 @@ export class MoviesService {
             .all() as Array<{
             id: string;
             title: string;
-            tmdb_id: number;
-            year: number;
+            tmdb_id: number | null;
+            year: number | null;
             created_at: string | null;
             updated_at: string | null;
         }>;
@@ -59,7 +58,7 @@ export class MoviesService {
             .prepare(
                 `UPDATE movies SET title = ?, tmdb_id = ?, year = ?, updated_at = ? WHERE id = ?`,
             )
-            .run(movie.title, movie.tmdbId ?? 0, movie.year ?? 0, now, id);
+            .run(movie.title, movie.tmdbId ?? null, movie.year ?? null, now, id);
         return this.findOneById(id);
     }
 
@@ -72,8 +71,8 @@ export class MoviesService {
             | {
                   id: string;
                   title: string;
-                  tmdb_id: number;
-                  year: number;
+                  tmdb_id: number | null;
+                  year: number | null;
                   created_at: string | null;
                   updated_at: string | null;
               }
@@ -90,8 +89,8 @@ export class MoviesService {
             | {
                   id: string;
                   title: string;
-                  tmdb_id: number;
-                  year: number;
+                  tmdb_id: number | null;
+                  year: number | null;
                   created_at: string | null;
                   updated_at: string | null;
               }

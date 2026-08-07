@@ -19,12 +19,13 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         const dbPath = this.requireEnv('SQLITE_PATH');
         mkdirSync(dirname(dbPath), { recursive: true });
         this.db = new Database(dbPath);
+        // Keep columns aligned with Movie in @mmfv/interfaces.
         this.db.exec(`
             CREATE TABLE IF NOT EXISTS movies (
                 id TEXT PRIMARY KEY,
                 title TEXT NOT NULL,
-                tmdb_id INTEGER NOT NULL UNIQUE,
-                year INTEGER NOT NULL,
+                tmdb_id INTEGER UNIQUE,
+                year INTEGER,
                 created_at TEXT,
                 updated_at TEXT
             )
@@ -55,10 +56,10 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
                 insert.run({
                     id: r.id,
                     title: r.title,
-                    tmdb_id: r.tmdbId,
-                    year: r.year,
-                    created_at: r.createdAt,
-                    updated_at: r.updatedAt,
+                    tmdb_id: r.tmdbId ?? null,
+                    year: r.year ?? null,
+                    created_at: r.createdAt ?? null,
+                    updated_at: r.updatedAt ?? null,
                 });
             }
         });
@@ -76,16 +77,16 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
     rowToMovie(row: {
         id: string;
         title: string;
-        tmdb_id: number;
-        year: number;
+        tmdb_id: number | null;
+        year: number | null;
         created_at: string | null;
         updated_at: string | null;
     }): Movie {
         return {
             id: row.id,
             title: row.title,
-            tmdbId: row.tmdb_id,
-            year: row.year,
+            ...(row.tmdb_id != null ? { tmdbId: row.tmdb_id } : {}),
+            ...(row.year != null ? { year: row.year } : {}),
             ...(row.created_at != null ? { createdAt: row.created_at } : {}),
             ...(row.updated_at != null ? { updatedAt: row.updated_at } : {}),
         };
