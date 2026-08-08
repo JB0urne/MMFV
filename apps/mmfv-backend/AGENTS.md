@@ -10,6 +10,7 @@ NestJS + SQLite API. Nx name: **`mmfv-backend`**. Global prefix `/api`. Update w
 | `POST` | `/api/movies` | `Movie` body (`id` assigned server-side) |
 | `POST` | `/api/movies/from-tmdb` | `{ tmdbId: number }` |
 | `PUT` | `/api/movies/:id` | `Movie` body |
+| `DELETE` | `/api/movies/:id` | `204` on success |
 | `GET` | `/api/tmdb/search/movie` | `?query=&page=` → `MovieTmdbSearchResponse` |
 
 `TMDB_API_KEY` stays on the backend only — never expose to the frontend.

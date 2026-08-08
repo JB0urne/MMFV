@@ -62,6 +62,11 @@ export class MoviesService {
         return this.findOneById(id);
     }
 
+    remove(id: string): boolean {
+        const result = this.sqlite.database.prepare(`DELETE FROM movies WHERE id = ?`).run(id);
+        return result.changes > 0;
+    }
+
     private findOneById(id: string): Movie | null {
         const row = this.sqlite.database
             .prepare(

@@ -88,9 +88,28 @@
                     <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef>Actions</th>
                         <td mat-cell *matCellDef="let movie">
-                            <button mat-stroked-button color="primary" type="button" (click)="onEditMovie(movie)">
-                                Edit
-                            </button>
+                            <div class="actions">
+                                <button
+                                    mat-icon-button
+                                    color="primary"
+                                    type="button"
+                                    matTooltip="Edit"
+                                    aria-label="Edit movie"
+                                    (click)="onEditMovie(movie)"
+                                >
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <button
+                                    mat-icon-button
+                                    color="warn"
+                                    type="button"
+                                    matTooltip="Delete"
+                                    aria-label="Delete movie"
+                                    (click)="onDeleteMovie(movie)"
+                                >
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
                         </td>
                     </ng-container>
                     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

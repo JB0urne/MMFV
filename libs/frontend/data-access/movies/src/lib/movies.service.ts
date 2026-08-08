@@ -48,4 +48,14 @@ export class MoviesService {
             }),
         );
     }
+
+    deleteMovie(id: string): Observable<void> {
+        const url = `${this.endpointUrl}/${encodeURIComponent(id)}`;
+        return this.http.delete<void>(url).pipe(
+            catchError(error => {
+                console.error('Error deleting movie:', error);
+                throw error;
+            }),
+        );
+    }
 }

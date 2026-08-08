@@ -73,3 +73,9 @@
 .add-random-btn {
     margin-bottom: 16px;
 }
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}

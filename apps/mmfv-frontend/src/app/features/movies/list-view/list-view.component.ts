@@ -3,10 +3,12 @@ import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TmdbService } from '@mmfv/frontend/data-access/movies';
 import { Movie, MovieTmdb } from '@mmfv/interfaces';
 import { Observable, Subject, of } from 'rxjs';
@@ -22,8 +24,10 @@ import { catchError, debounceTime, distinctUntilChanged, finalize, switchMap, ta
         MatPaginatorModule,
         MatButtonModule,
         MatFormFieldModule,
+        MatIconModule,
         MatInputModule,
         MatProgressSpinnerModule,
+        MatTooltipModule,
     ],
     templateUrl: './list-view.component.html',
     styleUrl: './list-view.component.css',
@@ -39,6 +43,7 @@ export class ListViewComponent implements OnDestroy {
     @Output() addRandomMovie = new EventEmitter<void>();
     @Output() addTmdbMovie = new EventEmitter<number>();
     @Output() editMovie = new EventEmitter<Movie>();
+    @Output() deleteMovie = new EventEmitter<Movie>();
 
     searchQuery = '';
     searchResults: MovieTmdb[] = [];
@@ -116,6 +121,10 @@ export class ListViewComponent implements OnDestroy {
 
     onEditMovie(movie: Movie) {
         this.editMovie.emit(movie);
+    }
+
+    onDeleteMovie(movie: Movie) {
+        this.deleteMovie.emit(movie);
     }
 
     releaseYear(releaseDate: string): string {

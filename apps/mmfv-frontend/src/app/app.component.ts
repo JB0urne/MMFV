@@ -181,4 +181,27 @@ export class AppComponent implements OnInit {
                 .subscribe();
         });
     }
+
+    onDeleteMovie(movie: Movie) {
+        this.moviesService
+            .deleteMovie(movie.id)
+            .pipe(
+                tap(() => {
+                    const movies = this.moviesSubject.value.filter(m => m.id !== movie.id);
+                    this.moviesSubject.next(movies);
+
+                    const pageSize = this.pageSizeSubject.value;
+                    const pageIndex = this.pageIndexSubject.value;
+                    const maxPageIndex = Math.max(0, Math.ceil(movies.length / pageSize) - 1);
+                    if (pageIndex > maxPageIndex) {
+                        this.pageIndexSubject.next(maxPageIndex);
+                    }
+                }),
+                catchError(error => {
+                    console.error('Error deleting movie:', error);
+                    return of(null);
+                }),
+            )
+            .subscribe();
+    }
 }
