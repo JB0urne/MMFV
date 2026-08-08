@@ -102,44 +102,6 @@ export class AppComponent implements OnInit {
             .subscribe();
     }
 
-    addRandomMovie() {
-        const randomTitles = [
-            'The Adventure Begins',
-            'Mystery of the Lost City',
-            'Echoes of Tomorrow',
-            'The Last Stand',
-            'Beyond the Horizon',
-            'Shadows in the Night',
-            'The Quest for Truth',
-            'Rising Phoenix',
-            'The Silent Storm',
-            'Journey to the Stars',
-        ];
-
-        const randomTitle = randomTitles[Math.floor(Math.random() * randomTitles.length)];
-        const randomYear = Math.floor(1950 + 75 * Math.random());
-        const randomTmdbId = Math.floor(Math.random() * 9000000 + 1000000);
-
-        const newMovie = {
-            title: randomTitle,
-            tmdbId: randomTmdbId,
-            year: randomYear,
-        };
-
-        this.moviesService
-            .addMovie(newMovie)
-            .pipe(
-                tap(() => {
-                    this.loadMovies();
-                }),
-                catchError(error => {
-                    console.error('Error adding random movie:', error);
-                    return of(null);
-                }),
-            )
-            .subscribe();
-    }
-
     onEditMovie(movie: Movie) {
         const dialogRef = this.dialog.open(EditMovieDialogComponent, {
             width: '420px',

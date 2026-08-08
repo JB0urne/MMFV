@@ -40,7 +40,6 @@ export class ListViewComponent implements OnDestroy {
     @Input() displayedColumns: string[] = ['title', 'tmdbId', 'year'];
 
     @Output() pageChange = new EventEmitter<PageEvent>();
-    @Output() addRandomMovie = new EventEmitter<void>();
     @Output() addTmdbMovie = new EventEmitter<number>();
     @Output() editMovie = new EventEmitter<Movie>();
     @Output() deleteMovie = new EventEmitter<Movie>();
@@ -104,10 +103,6 @@ export class ListViewComponent implements OnDestroy {
 
     onPageChange(event: PageEvent) {
         this.pageChange.emit(event);
-    }
-
-    onAddRandomMovie() {
-        this.addRandomMovie.emit();
     }
 
     onAddTmdbMovie(result: MovieTmdb) {

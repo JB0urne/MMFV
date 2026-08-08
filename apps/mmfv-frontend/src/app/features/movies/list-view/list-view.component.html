@@ -62,10 +62,6 @@
         }
     </section>
 
-    <button mat-raised-button color="primary" (click)="onAddRandomMovie()" class="add-random-btn">
-        Add Random Movie
-    </button>
-
     @if (paginatedMovies$ | async; as movies) {
         @if (movies.length > 0) {
             <div class="table-container">
