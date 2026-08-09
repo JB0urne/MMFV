@@ -7,8 +7,6 @@ import { Movie } from '@mmfv/interfaces';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { catchError, finalize, map, take, tap } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
-import { WelcomeComponent } from './components/welcome/welcome.component';
-import { FooterComponent } from './components/footer/footer.component';
 import { EditMovieDialogComponent } from './features/movies/edit-movie-dialog/edit-movie-dialog.component';
 import { ListViewComponent } from './features/movies/list-view/list-view.component';
 
@@ -18,8 +16,6 @@ import { ListViewComponent } from './features/movies/list-view/list-view.compone
     imports: [
         CommonModule,
         HeaderComponent,
-        WelcomeComponent,
-        FooterComponent,
         ListViewComponent,
         MatPaginatorModule,
         MatDialogModule,
@@ -31,7 +27,6 @@ export class AppComponent implements OnInit {
     @ViewChild(ListViewComponent) listView?: ListViewComponent;
 
     title = 'MMFV';
-    angularVersion = '21';
 
     displayedColumns: string[] = ['title', 'tmdbId', 'year', 'actions'];
 
