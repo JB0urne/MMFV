@@ -10,6 +10,62 @@
         <mat-label>Year</mat-label>
         <input matInput type="number" [(ngModel)]="year" />
     </mat-form-field>
+
+    @if (tmdbId != null) {
+        <p class="tmdb-id-hint">TMDB ID: {{ tmdbId }}</p>
+    }
+
+    <div class="tmdb-actions">
+        <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="onUpdateWithTmdb()"
+            [disabled]="searchLoading || !title.trim()"
+        >
+            Update with TMDB
+        </button>
+    </div>
+
+    @if (searchLoading) {
+        <div class="search-status">
+            <mat-spinner diameter="24"></mat-spinner>
+            <span>Searching TMDB…</span>
+        </div>
+    }
+
+    @if (searchError) {
+        <p class="search-error">{{ searchError }}</p>
+    }
+
+    @if (!searchLoading && searched && proposals.length === 0 && !searchError) {
+        <p class="search-empty">No TMDB results for "{{ title.trim() }}".</p>
+    }
+
+    @if (proposals.length > 0) {
+        <p class="proposals-label">TMDB proposals — accept one to fill the form, then Save:</p>
+        <ul class="search-results">
+            @for (result of proposals; track result.id) {
+                <li class="search-result">
+                    <div class="search-result-info">
+                        <strong>{{ result.title }}</strong>
+                        <span class="search-result-meta">
+                            {{ releaseYear(result.releaseDate) }}
+                            @if (result.originalTitle !== result.title) {
+                                · {{ result.originalTitle }}
+                            }
+                        </span>
+                        @if (result.overview) {
+                            <p class="search-result-overview">{{ result.overview }}</p>
+                        }
+                    </div>
+                    <button mat-stroked-button color="primary" type="button" (click)="onAcceptProposal(result)">
+                        Accept
+                    </button>
+                </li>
+            }
+        </ul>
+    }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

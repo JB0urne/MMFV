@@ -104,10 +104,11 @@ export class AppComponent implements OnInit {
 
     onEditMovie(movie: Movie) {
         const dialogRef = this.dialog.open(EditMovieDialogComponent, {
-            width: '420px',
+            width: '560px',
             data: {
                 title: movie.title,
                 year: movie.year,
+                tmdbId: movie.tmdbId,
             },
         });
 
@@ -119,6 +120,7 @@ export class AppComponent implements OnInit {
                 ...movie,
                 title: result.title,
                 year: result.year,
+                tmdbId: result.tmdbId,
             };
             this.moviesService
                 .updateMovie(movie.id, updatedMovie)
