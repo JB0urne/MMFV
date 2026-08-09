@@ -1,0 +1,106 @@
+<h2 mat-dialog-title>Import movies</h2>
+
+<mat-dialog-content class="dialog-content">
+    <p class="intro">
+        Paste one movie title per line. Preview builds the list; resolve against TMDB comes next, then
+        commit.
+    </p>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Movie titles</mat-label>
+        <textarea
+            matInput
+            rows="8"
+            [(ngModel)]="rawText"
+            placeholder="The Matrix&#10;Inception&#10;Spirited Away"
+        ></textarea>
+        <mat-hint>{{ lineCount }} title{{ lineCount === 1 ? '' : 's' }}</mat-hint>
+    </mat-form-field>
+
+    <div class="paste-actions">
+        <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="onPreview()"
+            [disabled]="lineCount === 0"
+        >
+            Preview list
+        </button>
+    </div>
+
+    @if (previewed) {
+        <div class="summary">
+            <span>{{ rows.length }} rows</span>
+            <span>· {{ autoCount }} auto</span>
+            <span>· {{ needsReviewCount }} need attention</span>
+            <span>· {{ readyCount }} ready to import</span>
+        </div>
+
+        @if (rows.length === 0) {
+            <p class="empty">No titles to import.</p>
+        } @else {
+            <ul class="import-rows">
+                @for (row of rows; track row.lineNumber) {
+                    <li class="import-row">
+                        <div class="import-row-main">
+                            <div class="import-row-info">
+                                <span class="line-number">{{ row.lineNumber }}.</span>
+                                <div class="titles">
+                                    <strong>{{ row.input }}</strong>
+                                    @if (row.chosenTitle) {
+                                        <span class="chosen">
+                                            → {{ row.chosenTitle }}
+                                            @if (row.chosenYear) {
+                                                ({{ row.chosenYear }})
+                                            }
+                                            @if (row.chosenTmdbId != null) {
+                                                · TMDB {{ row.chosenTmdbId }}
+                                            }
+                                        </span>
+                                    }
+                                </div>
+                                <span class="status-chip" [attr.data-status]="row.status">
+                                    {{ statusLabel(row.status) }}
+                                </span>
+                            </div>
+                            <div class="import-row-actions">
+                                <button mat-stroked-button type="button" (click)="onToggleSearch(row)">
+                                    {{ row.searchOpen ? 'Hide search' : 'Search TMDB' }}
+                                </button>
+                                @if (row.chosenTmdbId != null || row.status === 'auto') {
+                                    <button mat-button type="button" (click)="onClearChoice(row)">
+                                        Clear
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        @if (row.searchOpen) {
+                            <div class="search-panel">
+                                <p class="search-placeholder">
+                                    Per-row TMDB search will appear here. Auto-matched rows stay marked
+                                    Auto; you can still search and override.
+                                </p>
+                            </div>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Cancel</button>
+    <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="onCommit()"
+        [disabled]="true"
+        title="Enabled after resolve/commit is wired"
+    >
+        Import ready
+    </button>
+</mat-dialog-actions>

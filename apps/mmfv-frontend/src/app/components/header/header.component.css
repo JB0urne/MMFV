@@ -132,6 +132,10 @@
     box-sizing: border-box;
 }
 
+.nav > ul > li > div.nav-action {
+    cursor: pointer;
+}
+
 .nav > ul > li > div::before {
     content: '';
     position: absolute;

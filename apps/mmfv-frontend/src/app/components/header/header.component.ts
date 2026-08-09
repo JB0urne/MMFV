@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
     selector: 'app-header',
@@ -8,4 +8,10 @@ import { CommonModule } from '@angular/common';
     templateUrl: './header.component.html',
     styleUrl: './header.component.css',
 })
-export class HeaderComponent {}
+export class HeaderComponent {
+    @Output() importClick = new EventEmitter<void>();
+
+    onImportClick(): void {
+        this.importClick.emit();
+    }
+}

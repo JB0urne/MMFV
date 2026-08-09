@@ -8,6 +8,7 @@ import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { catchError, finalize, map, take, tap } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
 import { EditMovieDialogComponent } from './features/movies/edit-movie-dialog/edit-movie-dialog.component';
+import { ImportMoviesDialogComponent } from './features/movies/import-movies-dialog/import-movies-dialog.component';
 import { ListViewComponent } from './features/movies/list-view/list-view.component';
 
 @Component({
@@ -95,6 +96,12 @@ export class AppComponent implements OnInit {
                 }),
             )
             .subscribe();
+    }
+
+    onImportMovies() {
+        this.dialog.open(ImportMoviesDialogComponent, {
+            width: '720px',
+        });
     }
 
     onEditMovie(movie: Movie) {

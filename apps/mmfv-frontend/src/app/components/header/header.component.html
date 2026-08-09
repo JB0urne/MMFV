@@ -20,8 +20,14 @@
                     </div>
                 </li>
                 <li>
-                    <div>
-                        <div>SORTIEREN</div>
+                    <div
+                        class="nav-action"
+                        role="button"
+                        tabindex="0"
+                        (click)="onImportClick()"
+                        (keydown.enter)="onImportClick()"
+                    >
+                        <div>IMPORT</div>
                     </div>
                 </li>
                 <li>
