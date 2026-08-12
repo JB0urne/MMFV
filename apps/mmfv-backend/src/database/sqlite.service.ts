@@ -1,6 +1,6 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Movie, StrictMovie } from '@mmfv/interfaces';
+import type { Movie, StrictMovie } from '@mmfv/interfaces';
 import Database from 'better-sqlite3';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { dirname } from 'path';

@@ -1,5 +1,5 @@
 import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
-import { MovieTmdbSearchResponse } from '@mmfv/interfaces';
+import type { MovieTmdbSearchResponse } from '@mmfv/interfaces';
 import { TmdbService } from './tmdb.service';
 
 @Controller('tmdb')

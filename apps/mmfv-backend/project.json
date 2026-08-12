@@ -6,16 +6,20 @@
     "tags": ["backend", "nest"],
     "targets": {
         "build": {
-            "executor": "@nx/js:tsc",
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
             "options": {
+                "platform": "node",
                 "outputPath": "dist/apps/mmfv-backend",
-                "main": "src/main.ts",
-                "tsConfig": "apps/mmfv-backend/tsconfig.json",
-                "rootDir": ".",
-                "outputFileName": "apps/mmfv-backend/src/main.js",
-                "generatePackageJson": true
-            },
-            "outputs": ["{options.outputPath}"]
+                "outputFileName": "main.js",
+                "format": ["cjs"],
+                "bundle": true,
+                "thirdParty": false,
+                "main": "apps/mmfv-backend/src/main.ts",
+                "tsConfig": "apps/mmfv-backend/tsconfig.app.json",
+                "generatePackageJson": true,
+                "esbuildConfig": "apps/mmfv-backend/esbuild.config.cjs"
+            }
         },
         "serve": {
             "executor": "@nx/js:node",
