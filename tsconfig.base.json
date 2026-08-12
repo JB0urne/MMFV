@@ -14,6 +14,7 @@
         "skipDefaultLibCheck": true,
         "baseUrl": ".",
         "paths": {
+            "@mmfv/constants": ["libs/shared/constants/src/index.ts"],
             "@mmfv/interfaces": ["libs/shared/interfaces/src/index.ts"],
             "@mmfv/frontend/data-access/movies": ["libs/frontend/data-access/movies/src/index.ts"]
         },

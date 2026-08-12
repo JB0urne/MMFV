@@ -8,7 +8,7 @@ import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { catchError, finalize, map, take, tap } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
 import { EditMovieDialogComponent } from './features/movies/edit-movie-dialog/edit-movie-dialog.component';
-import { ImportMoviesDialogComponent } from './features/movies/import-movies-dialog/import-movies-dialog.component';
+import { ImportMoviesDialogComponent, ImportMoviesDialogData } from './features/movies/import-movies-dialog/import-movies-dialog.component';
 import { ListViewComponent } from './features/movies/list-view/list-view.component';
 
 @Component({
@@ -99,8 +99,18 @@ export class AppComponent implements OnInit {
     }
 
     onImportMovies() {
-        this.dialog.open(ImportMoviesDialogComponent, {
-            width: '720px',
+        const dialogRef = this.dialog.open(ImportMoviesDialogComponent, {
+            width: '900px',
+            maxWidth: '95vw',
+            data: {
+                catalog: this.moviesSubject.value,
+            } satisfies ImportMoviesDialogData,
+        });
+
+        dialogRef.afterClosed().subscribe(imported => {
+            if (imported) {
+                this.loadMovies();
+            }
         });
     }
 

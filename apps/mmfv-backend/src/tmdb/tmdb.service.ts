@@ -1,6 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Movie, MovieTmdb, MovieTmdbSearchResponse } from '@mmfv/interfaces';
+import type { Movie, MovieTmdb, MovieTmdbSearchResponse } from '@mmfv/interfaces';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -52,17 +52,7 @@ export class TmdbService {
         url.searchParams.set('page', String(page));
         url.searchParams.set('include_adult', 'false');
 
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${this.accessToken}`,
-                Accept: 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            throw new ServiceUnavailableException(`TMDB search failed (${response.status})`);
-        }
-
+        const response = await this.fetchOnce(url, 'TMDB search');
         const data = (await response.json()) as TmdbSearchResponseRaw;
         return {
             page: data.page,
@@ -74,20 +64,29 @@ export class TmdbService {
 
     async getMovie(tmdbId: number): Promise<Movie> {
         const url = new URL(`${TMDB_BASE_URL}/movie/${tmdbId}`);
-
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${this.accessToken}`,
-                Accept: 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            throw new ServiceUnavailableException(`TMDB movie lookup failed (${response.status})`);
-        }
-
+        const response = await this.fetchOnce(url, 'TMDB movie lookup');
         const data = (await response.json()) as TmdbMovieDetailsRaw;
         return mapTmdbDetailsToMovie(data);
+    }
+
+    private async fetchOnce(url: URL, label: string): Promise<Response> {
+        let response: Response;
+        try {
+            response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`,
+                    Accept: 'application/json',
+                },
+            });
+        } catch {
+            throw new ServiceUnavailableException(`${label} failed (network error)`);
+        }
+
+        if (!response.ok) {
+            throw new ServiceUnavailableException(`${label} failed (${response.status})`);
+        }
+
+        return response;
     }
 }
 

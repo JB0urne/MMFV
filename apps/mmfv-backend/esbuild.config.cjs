@@ -1,5 +1,5 @@
 /**
- * Extra esbuild options for Nest (Elevait Nest apps used webpack for the same reason).
+ * Extra esbuild options for Nest.
  * SWC emits decorator metadata; plain esbuild does not.
  * Also maps tsconfig path aliases so workspace libs bundle from source.
  */

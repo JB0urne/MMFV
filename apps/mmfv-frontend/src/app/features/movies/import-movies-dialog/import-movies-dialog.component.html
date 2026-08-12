@@ -2,8 +2,8 @@
 
 <mat-dialog-content class="dialog-content">
     <p class="intro">
-        Paste one movie title per line. Preview builds the list; resolve against TMDB comes next, then
-        commit.
+        Paste one movie title per line. Preview the list, resolve TMDB matches in batches of
+        {{ batchSize }}, settle every row, then import.
     </p>
 
     <mat-form-field appearance="outline" class="full-width">
@@ -13,6 +13,7 @@
             rows="8"
             [(ngModel)]="rawText"
             placeholder="The Matrix&#10;Inception&#10;Spirited Away"
+            [disabled]="resolveLoading || commitLoading"
         ></textarea>
         <mat-hint>{{ lineCount }} title{{ lineCount === 1 ? '' : 's' }}</mat-hint>
     </mat-form-field>
@@ -23,18 +24,59 @@
             color="primary"
             type="button"
             (click)="onPreview()"
-            [disabled]="lineCount === 0"
+            [disabled]="lineCount === 0 || resolveLoading || commitLoading"
         >
             Preview list
         </button>
+        @if (previewed && unresolvedCount > 0) {
+            <button
+                mat-flat-button
+                color="primary"
+                type="button"
+                (click)="onResolveNextBatch()"
+                [disabled]="resolveLoading || commitLoading"
+            >
+                @if (resolveLoading) {
+                    Resolving…
+                } @else {
+                    Resolve next {{ nextBatchSize }}
+                }
+            </button>
+        }
+        @if (previewed && unresolvedCount === 0 && rows.length > 0) {
+            <button mat-stroked-button type="button" disabled>All rows resolved</button>
+        }
     </div>
+
+    @if (resolveLoading) {
+        <div class="search-status">
+            <mat-spinner diameter="24"></mat-spinner>
+            <span>Resolving batch against TMDB…</span>
+        </div>
+    }
+
+    @if (resolveError) {
+        <p class="search-error">{{ resolveError }}</p>
+        @if (showOfflineActions) {
+            <div class="offline-actions">
+                <button mat-stroked-button type="button" (click)="onMarkUnresolvedAsTitleOnly()">
+                    Mark remaining as title-only
+                </button>
+                <button mat-button type="button" (click)="onCancel()">Abort</button>
+            </div>
+        }
+    }
+
+    @if (commitError) {
+        <p class="search-error">{{ commitError }}</p>
+    }
 
     @if (previewed) {
         <div class="summary">
-            <span>{{ rows.length }} rows</span>
+            <span>{{ resolvedCount }} / {{ rows.length }} resolved</span>
             <span>· {{ autoCount }} auto</span>
             <span>· {{ needsReviewCount }} need attention</span>
-            <span>· {{ readyCount }} ready to import</span>
+            <span>· {{ settledCount }} / {{ rows.length }} settled</span>
         </div>
 
         @if (rows.length === 0) {
@@ -43,47 +85,172 @@
             <ul class="import-rows">
                 @for (row of rows; track row.lineNumber) {
                     <li class="import-row">
-                        <div class="import-row-main">
-                            <div class="import-row-info">
-                                <span class="line-number">{{ row.lineNumber }}.</span>
-                                <div class="titles">
-                                    <strong>{{ row.input }}</strong>
+                        <div class="import-row-top">
+                            <span class="line-number">{{ row.lineNumber }}.</span>
+                            <div class="import-row-body">
+                                <div class="import-row-heading">
+                                    <strong class="input-title">{{ row.input }}</strong>
                                     @if (row.chosenTitle) {
-                                        <span class="chosen">
-                                            → {{ row.chosenTitle }}
-                                            @if (row.chosenYear) {
-                                                ({{ row.chosenYear }})
-                                            }
-                                            @if (row.chosenTmdbId != null) {
-                                                · TMDB {{ row.chosenTmdbId }}
-                                            }
-                                        </span>
+                                        <span class="chosen">→ {{ chosenSummary(row) }}</span>
+                                    }
+                                    @if (row.status === 'title-only') {
+                                        <span class="chosen">→ import title only</span>
+                                    }
+                                    <span class="status-chip" [attr.data-status]="row.status">
+                                        {{ statusLabel(row.status) }}
+                                    </span>
+                                </div>
+
+                                <div class="import-row-actions">
+                                    @if (row.status !== 'skipped' && row.status !== 'exists') {
+                                        <button
+                                            mat-button
+                                            type="button"
+                                            class="row-action"
+                                            (click)="onToggleSearch(row)"
+                                            [disabled]="resolveLoading || commitLoading"
+                                        >
+                                            {{ row.searchOpen ? 'Hide search' : 'Search TMDB' }}
+                                        </button>
+                                        <button
+                                            mat-button
+                                            type="button"
+                                            class="row-action"
+                                            (click)="onAcceptTitleOnly(row)"
+                                            [disabled]="resolveLoading || commitLoading"
+                                        >
+                                            Title only
+                                        </button>
+                                        <button
+                                            mat-button
+                                            type="button"
+                                            class="row-action"
+                                            (click)="onSkip(row)"
+                                            [disabled]="resolveLoading || commitLoading"
+                                        >
+                                            Skip
+                                        </button>
+                                    }
+                                    @if (
+                                        row.status === 'auto' ||
+                                        row.status === 'manual' ||
+                                        row.status === 'title-only' ||
+                                        row.status === 'skipped' ||
+                                        row.status === 'exists'
+                                    ) {
+                                        <button
+                                            mat-button
+                                            type="button"
+                                            class="row-action"
+                                            (click)="onClearChoice(row)"
+                                            [disabled]="resolveLoading || commitLoading"
+                                        >
+                                            Clear
+                                        </button>
                                     }
                                 </div>
-                                <span class="status-chip" [attr.data-status]="row.status">
-                                    {{ statusLabel(row.status) }}
-                                </span>
-                            </div>
-                            <div class="import-row-actions">
-                                <button mat-stroked-button type="button" (click)="onToggleSearch(row)">
-                                    {{ row.searchOpen ? 'Hide search' : 'Search TMDB' }}
-                                </button>
-                                @if (row.chosenTmdbId != null || row.status === 'auto') {
-                                    <button mat-button type="button" (click)="onClearChoice(row)">
-                                        Clear
-                                    </button>
+
+                                @if (row.searchOpen) {
+                                    <div class="search-panel">
+                                        <div class="search-panel-query">
+                                            <mat-form-field
+                                                appearance="outline"
+                                                class="search-query-field"
+                                                subscriptSizing="dynamic"
+                                            >
+                                                <mat-label>Search TMDB</mat-label>
+                                                <input
+                                                    matInput
+                                                    [(ngModel)]="row.searchQuery"
+                                                    [disabled]="
+                                                        row.searchLoading ||
+                                                        resolveLoading ||
+                                                        commitLoading
+                                                    "
+                                                    (keydown.enter)="$event.preventDefault(); onSearchRow(row)"
+                                                />
+                                            </mat-form-field>
+                                            <button
+                                                mat-button
+                                                color="primary"
+                                                type="button"
+                                                class="row-action"
+                                                (click)="onSearchRow(row)"
+                                                [disabled]="
+                                                    row.searchLoading ||
+                                                    resolveLoading ||
+                                                    commitLoading ||
+                                                    !row.searchQuery.trim()
+                                                "
+                                            >
+                                                Refresh search
+                                            </button>
+                                        </div>
+
+                                        @if (row.searchLoading) {
+                                            <div class="search-status">
+                                                <mat-spinner diameter="24"></mat-spinner>
+                                                <span>Searching TMDB…</span>
+                                            </div>
+                                        }
+
+                                        @if (row.searchError) {
+                                            <p class="search-error">{{ row.searchError }}</p>
+                                        }
+
+                                        @if (
+                                            !row.searchLoading &&
+                                            row.candidates.length === 0 &&
+                                            !row.searchError
+                                        ) {
+                                            <p class="search-empty">
+                                                No TMDB results for "{{ row.searchQuery.trim() }}".
+                                            </p>
+                                        }
+
+                                        @if (row.candidates.length > 0) {
+                                            <ul class="search-results">
+                                                @for (result of row.candidates; track result.id) {
+                                                    <li class="search-result">
+                                                        <div class="search-result-info">
+                                                            <strong>{{ result.title }}</strong>
+                                                            <span class="search-result-meta">
+                                                                {{ releaseYear(result.releaseDate) }}
+                                                                @if (
+                                                                    result.originalTitle !==
+                                                                    result.title
+                                                                ) {
+                                                                    · {{ result.originalTitle }}
+                                                                }
+                                                            </span>
+                                                            @if (result.overview) {
+                                                                <p class="search-result-overview">
+                                                                    {{ result.overview }}
+                                                                </p>
+                                                            }
+                                                        </div>
+                                                <button
+                                                    mat-button
+                                                    color="primary"
+                                                    type="button"
+                                                    class="row-action"
+                                                    (click)="onAcceptCandidate(row, result)"
+                                                    [disabled]="commitLoading"
+                                                >
+                                                    {{
+                                                        isCatalogTmdbId(result.id)
+                                                            ? 'In catalog'
+                                                            : 'Accept'
+                                                    }}
+                                                </button>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
                                 }
                             </div>
                         </div>
-
-                        @if (row.searchOpen) {
-                            <div class="search-panel">
-                                <p class="search-placeholder">
-                                    Per-row TMDB search will appear here. Auto-matched rows stay marked
-                                    Auto; you can still search and override.
-                                </p>
-                            </div>
-                        }
                     </li>
                 }
             </ul>
@@ -92,15 +259,21 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <button mat-button type="button" (click)="onCancel()">Cancel</button>
+    <button mat-button type="button" (click)="onCancel()" [disabled]="commitLoading">
+        Cancel
+    </button>
     <button
         mat-flat-button
         color="primary"
         type="button"
         (click)="onCommit()"
-        [disabled]="true"
-        title="Enabled after resolve/commit is wired"
+        [disabled]="!allSettled || commitLoading"
+        [title]="allSettled ? 'Import settled rows' : 'Settle every row before importing'"
     >
-        Import ready
+        @if (commitLoading) {
+            Importing…
+        } @else {
+            Import ready
+        }
     </button>
 </mat-dialog-actions>

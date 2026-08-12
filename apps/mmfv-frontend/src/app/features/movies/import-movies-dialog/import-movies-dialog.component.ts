@@ -1,24 +1,44 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Inject, OnDestroy, Optional } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MoviesService, TmdbService } from '@mmfv/frontend/data-access/movies';
+import { MOVIE_IMPORT_BATCH_SIZE } from '@mmfv/constants';
+import { Movie, MovieImportCommitItem, MovieTmdb } from '@mmfv/interfaces';
+import { Subject, of } from 'rxjs';
+import { catchError, finalize, takeUntil } from 'rxjs/operators';
 
-/** UI-only row status until resolve/commit is wired. */
-export type ImportRowStatus = 'unresolved' | 'auto' | 'ambiguous' | 'none' | 'exists';
+export type ImportMoviesDialogData = {
+    catalog: Movie[];
+};
+
+export type ImportRowStatus =
+    | 'unresolved'
+    | 'auto'
+    | 'manual'
+    | 'ambiguous'
+    | 'none'
+    | 'exists'
+    | 'skipped'
+    | 'title-only';
 
 export type ImportMovieRow = {
     lineNumber: number;
     input: string;
+    /** Editable query for per-row TMDB search (defaults to pasted input). */
+    searchQuery: string;
     status: ImportRowStatus;
-    /** Set when a TMDB match is chosen (auto or manual). */
+    candidates: MovieTmdb[];
     chosenTitle?: string;
     chosenYear?: number;
     chosenTmdbId?: number;
-    /** Whether the per-row search panel is expanded. */
     searchOpen: boolean;
+    searchLoading: boolean;
+    searchError: string | null;
 };
 
 @Component({
@@ -31,19 +51,56 @@ export type ImportMovieRow = {
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
+        MatProgressSpinnerModule,
     ],
     templateUrl: './import-movies-dialog.component.html',
     styleUrl: './import-movies-dialog.component.css',
 })
-export class ImportMoviesDialogComponent {
+export class ImportMoviesDialogComponent implements OnDestroy {
+    readonly batchSize = MOVIE_IMPORT_BATCH_SIZE;
+
     rawText = '';
     rows: ImportMovieRow[] = [];
     previewed = false;
 
-    constructor(private dialogRef: MatDialogRef<ImportMoviesDialogComponent, null>) {}
+    resolveLoading = false;
+    commitLoading = false;
+    resolveError: string | null = null;
+    commitError: string | null = null;
+    showOfflineActions = false;
+
+    private readonly destroy$ = new Subject<void>();
+    private readonly catalogByTitle: Map<string, Movie>;
+    private readonly catalogTmdbIds: Set<number>;
+
+    constructor(
+        private dialogRef: MatDialogRef<ImportMoviesDialogComponent, boolean | null>,
+        private moviesService: MoviesService,
+        private tmdbService: TmdbService,
+        @Optional() @Inject(MAT_DIALOG_DATA) data: ImportMoviesDialogData | null,
+    ) {
+        const catalog = data?.catalog ?? [];
+        this.catalogByTitle = buildCatalogTitleIndex(catalog);
+        this.catalogTmdbIds = new Set(
+            catalog.map(movie => movie.tmdbId).filter((id): id is number => id != null),
+        );
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
 
     get lineCount(): number {
         return this.parseLines(this.rawText).length;
+    }
+
+    get unresolvedCount(): number {
+        return this.rows.filter(r => r.status === 'unresolved').length;
+    }
+
+    get resolvedCount(): number {
+        return this.rows.length - this.unresolvedCount;
     }
 
     get autoCount(): number {
@@ -51,51 +108,222 @@ export class ImportMoviesDialogComponent {
     }
 
     get needsReviewCount(): number {
-        return this.rows.filter(r => r.status === 'ambiguous' || r.status === 'none' || r.status === 'unresolved')
-            .length;
+        return this.rows.filter(
+            r => r.status === 'ambiguous' || r.status === 'none' || r.status === 'unresolved',
+        ).length;
     }
 
-    get readyCount(): number {
-        return this.rows.filter(r => r.chosenTmdbId != null || r.status === 'auto').length;
+    get settledCount(): number {
+        return this.rows.filter(r => this.isSettled(r)).length;
+    }
+
+    get allSettled(): boolean {
+        return this.rows.length > 0 && this.rows.every(r => this.isSettled(r));
+    }
+
+    get nextBatchSize(): number {
+        return Math.min(this.unresolvedCount, this.batchSize);
     }
 
     onPreview(): void {
         const lines = this.parseLines(this.rawText);
-        this.rows = lines.map((input, index) => ({
-            lineNumber: index + 1,
-            input,
-            status: 'unresolved' as const,
-            searchOpen: false,
-        }));
+        this.rows = lines.map((input, index) => {
+            const row = this.createRow(index + 1, input);
+            const existing = this.catalogByTitle.get(normalizeImportTitle(input));
+            if (existing) {
+                row.status = 'exists';
+                row.chosenTitle = existing.title;
+                row.chosenYear = existing.year;
+                row.chosenTmdbId = existing.tmdbId;
+            }
+            return row;
+        });
         this.previewed = true;
+        this.resolveError = null;
+        this.commitError = null;
+        this.showOfflineActions = false;
+
+        // Resolve the first batch immediately so small imports don't need a second click.
+        if (this.unresolvedCount > 0) {
+            this.onResolveNextBatch();
+        }
+    }
+
+    onResolveNextBatch(): void {
+        if (this.resolveLoading || this.nextBatchSize === 0) {
+            return;
+        }
+
+        const targets = this.rows.filter(r => r.status === 'unresolved').slice(0, this.batchSize);
+        const titles = targets.map(r => r.input);
+
+        this.resolveLoading = true;
+        this.resolveError = null;
+        this.showOfflineActions = false;
+
+        this.moviesService
+            .previewImport(titles)
+            .pipe(
+                catchError(error => {
+                    this.resolveError =
+                        error?.error?.message ??
+                        'TMDB resolve failed. Abort, or mark remaining as title-only.';
+                    this.showOfflineActions = true;
+                    return of(null);
+                }),
+                finalize(() => {
+                    this.resolveLoading = false;
+                }),
+                takeUntil(this.destroy$),
+            )
+            .subscribe(response => {
+                if (!response) {
+                    return;
+                }
+                response.items.forEach((item, index) => {
+                    const row = targets[index];
+                    if (!row) {
+                        return;
+                    }
+                    row.status = item.status;
+                    row.candidates = item.candidates ?? [];
+                    row.chosenTmdbId = item.chosenTmdbId;
+                    row.chosenTitle = item.chosenTitle;
+                    row.chosenYear = item.chosenYear;
+                    row.searchError = null;
+                    this.applyCatalogDedup(row);
+                });
+            });
     }
 
     onToggleSearch(row: ImportMovieRow): void {
         row.searchOpen = !row.searchOpen;
+        if (row.searchOpen && row.candidates.length === 0 && !row.searchLoading) {
+            this.onSearchRow(row);
+        }
+    }
+
+    onSearchRow(row: ImportMovieRow): void {
+        const query = row.searchQuery.trim();
+        if (!query) {
+            row.searchError = 'Enter a title to search TMDB.';
+            return;
+        }
+
+        row.searchLoading = true;
+        row.searchError = null;
+
+        this.tmdbService
+            .searchMovies(query)
+            .pipe(
+                catchError(error => {
+                    row.searchError =
+                        error?.error?.message ??
+                        'Search failed. Check that TMDB_API_KEY is configured.';
+                    return of(null);
+                }),
+                finalize(() => {
+                    row.searchLoading = false;
+                }),
+                takeUntil(this.destroy$),
+            )
+            .subscribe(response => {
+                if (response) {
+                    row.candidates = response.results;
+                }
+            });
+    }
+
+    onAcceptCandidate(row: ImportMovieRow, result: MovieTmdb): void {
+        row.chosenTitle = result.title.trim();
+        row.chosenYear = this.yearFromReleaseDate(result.releaseDate);
+        row.chosenTmdbId = result.id;
+        row.status = this.catalogTmdbIds.has(result.id) ? 'exists' : 'manual';
+        row.searchOpen = false;
+        row.searchError = null;
+    }
+
+    onAcceptTitleOnly(row: ImportMovieRow): void {
+        row.chosenTitle = undefined;
+        row.chosenYear = undefined;
+        row.chosenTmdbId = undefined;
+        row.status = 'title-only';
+        row.searchOpen = false;
+        row.searchError = null;
+    }
+
+    onSkip(row: ImportMovieRow): void {
+        row.chosenTitle = undefined;
+        row.chosenYear = undefined;
+        row.chosenTmdbId = undefined;
+        row.status = 'skipped';
+        row.searchOpen = false;
+        row.searchError = null;
     }
 
     onClearChoice(row: ImportMovieRow): void {
         row.chosenTitle = undefined;
         row.chosenYear = undefined;
         row.chosenTmdbId = undefined;
-        if (row.status === 'auto') {
+        if (row.candidates.length > 0) {
+            row.status = 'ambiguous';
+        } else {
             row.status = 'unresolved';
         }
+    }
+
+    onMarkUnresolvedAsTitleOnly(): void {
+        for (const row of this.rows) {
+            if (
+                row.status === 'unresolved' ||
+                row.status === 'ambiguous' ||
+                row.status === 'none'
+            ) {
+                this.onAcceptTitleOnly(row);
+            }
+        }
+        this.showOfflineActions = false;
+        this.resolveError = null;
     }
 
     statusLabel(status: ImportRowStatus): string {
         switch (status) {
             case 'auto':
                 return 'Auto';
+            case 'manual':
+                return 'Manual';
             case 'ambiguous':
                 return 'Needs review';
             case 'none':
                 return 'Not found';
             case 'exists':
                 return 'Already in catalog';
+            case 'skipped':
+                return 'Skipped';
+            case 'title-only':
+                return 'Title only';
             default:
                 return 'Unresolved';
         }
+    }
+
+    releaseYear(releaseDate: string): string {
+        return releaseDate?.slice(0, 4) || '—';
+    }
+
+    chosenSummary(row: ImportMovieRow): string {
+        const parts = [row.chosenTitle ?? ''];
+        if (row.chosenYear) {
+            parts.push(`(${row.chosenYear})`);
+        }
+        if (row.chosenTmdbId != null) {
+            parts.push(`· TMDB ${row.chosenTmdbId}`);
+        }
+        return parts.join(' ');
+    }
+
+    isCatalogTmdbId(tmdbId: number): boolean {
+        return this.catalogTmdbIds.has(tmdbId);
     }
 
     onCancel(): void {
@@ -103,7 +331,80 @@ export class ImportMoviesDialogComponent {
     }
 
     onCommit(): void {
-        // Resolve → commit API not wired yet; UI only.
+        if (!this.allSettled || this.commitLoading) {
+            return;
+        }
+
+        const items: MovieImportCommitItem[] = [];
+        for (const row of this.rows) {
+            if (row.status === 'skipped' || row.status === 'exists') {
+                continue;
+            }
+            if (row.chosenTmdbId != null && (row.status === 'auto' || row.status === 'manual')) {
+                items.push({ type: 'tmdb', tmdbId: row.chosenTmdbId });
+                continue;
+            }
+            if (row.status === 'title-only') {
+                items.push({ type: 'title', title: row.input });
+            }
+        }
+
+        this.commitLoading = true;
+        this.commitError = null;
+
+        this.moviesService
+            .commitImport({ items })
+            .pipe(
+                catchError(error => {
+                    this.commitError =
+                        error?.error?.message ?? 'Import commit failed. Try again.';
+                    return of(null);
+                }),
+                finalize(() => {
+                    this.commitLoading = false;
+                }),
+                takeUntil(this.destroy$),
+            )
+            .subscribe(response => {
+                if (response) {
+                    this.dialogRef.close(true);
+                }
+            });
+    }
+
+    private isSettled(row: ImportMovieRow): boolean {
+        return (
+            row.status === 'auto' ||
+            row.status === 'manual' ||
+            row.status === 'title-only' ||
+            row.status === 'skipped' ||
+            row.status === 'exists'
+        );
+    }
+
+    private createRow(lineNumber: number, input: string): ImportMovieRow {
+        return {
+            lineNumber,
+            input,
+            searchQuery: input,
+            status: 'unresolved',
+            candidates: [],
+            searchOpen: false,
+            searchLoading: false,
+            searchError: null,
+        };
+    }
+
+    /** Mark as already-in-catalog when chosen TMDB id is in the current catalog. */
+    private applyCatalogDedup(row: ImportMovieRow): void {
+        if (row.chosenTmdbId != null && this.catalogTmdbIds.has(row.chosenTmdbId)) {
+            row.status = 'exists';
+        }
+    }
+
+    private yearFromReleaseDate(releaseDate: string): number {
+        const year = releaseDate ? Number.parseInt(releaseDate.slice(0, 4), 10) : 0;
+        return Number.isFinite(year) ? year : 0;
     }
 
     private parseLines(text: string): string[] {
@@ -112,4 +413,19 @@ export class ImportMoviesDialogComponent {
             .map(line => line.trim())
             .filter(line => line.length > 0);
     }
+}
+
+function normalizeImportTitle(value: string): string {
+    return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function buildCatalogTitleIndex(catalog: Movie[]): Map<string, Movie> {
+    const index = new Map<string, Movie>();
+    for (const movie of catalog) {
+        const key = normalizeImportTitle(movie.title);
+        if (key && !index.has(key)) {
+            index.set(key, movie);
+        }
+    }
+    return index;
 }

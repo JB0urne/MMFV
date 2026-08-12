@@ -11,6 +11,7 @@ Do **not** run `npm install` / package changes or start servers (`npm run app`, 
 ## Conventions
 
 - Shared types → `libs/shared/interfaces` (`@mmfv/interfaces`).
+- Shared constants → `libs/shared/constants` (`@mmfv/constants`).
 - Reusable Angular code → `libs/frontend/` (see `.cursor/skills/angular-component-placement/SKILL.md`).
 - New Angular components: separate `.ts` / `.html` / `.css`; standalone preferred.
 - API prefix `/api`; frontend calls `/api/...` (dev proxy → backend).
@@ -18,10 +19,7 @@ Do **not** run `npm install` / package changes or start servers (`npm run app`, 
 
 ## Path aliases
 
-| Alias | Library |
-| --- | --- |
-| `@mmfv/interfaces` | `libs/shared/interfaces` |
-| `@mmfv/frontend/data-access/movies` | `libs/frontend/data-access/movies` |
+Can be found in tsconfig.base.json
 
 ## Where to look
 
@@ -40,4 +38,5 @@ Do **not** run `npm install` / package changes or start servers (`npm run app`, 
 | `apps/mmfv-frontend` | `frontend` |
 | `apps/mmfv-backend` | `mmfv-backend` |
 | `libs/shared/interfaces` | `interfaces` |
+| `libs/shared/constants` | `constants` |
 | `libs/frontend/data-access/movies` | `frontend-data-access-movies` |

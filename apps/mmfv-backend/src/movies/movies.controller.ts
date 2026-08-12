@@ -9,8 +9,13 @@ import {
     HttpCode,
     HttpStatus,
     NotFoundException,
+    BadRequestException,
 } from '@nestjs/common';
-import { Movie } from '@mmfv/interfaces';
+import type {
+    Movie,
+    MovieImportCommitRequest,
+    MovieImportPreviewRequest,
+} from '@mmfv/interfaces';
 import { MoviesService } from './movies.service';
 
 @Controller('movies')
@@ -27,6 +32,20 @@ export class MoviesController {
     @HttpCode(HttpStatus.CREATED)
     async addByTmdbId(@Body() body: { tmdbId: number }) {
         return this.moviesService.addByTmdbId(body.tmdbId);
+    }
+
+    @Post('import/preview')
+    async previewImport(@Body() body: MovieImportPreviewRequest) {
+        if (!body || !Array.isArray(body.titles)) {
+            throw new BadRequestException('titles must be an array of strings');
+        }
+        return this.moviesService.previewImport(body.titles);
+    }
+
+    @Post('import/commit')
+    @HttpCode(HttpStatus.CREATED)
+    async commitImport(@Body() body: MovieImportCommitRequest) {
+        return this.moviesService.commitImport(body);
     }
 
     @Get()

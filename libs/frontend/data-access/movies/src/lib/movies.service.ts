@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { timeout, catchError } from 'rxjs/operators';
-import { Movie } from '@mmfv/interfaces';
+import { catchError } from 'rxjs/operators';
+import {
+    Movie,
+    MovieImportCommitRequest,
+    MovieImportCommitResponse,
+    MovieImportPreviewRequest,
+    MovieImportPreviewResponse,
+} from '@mmfv/interfaces';
 
 @Injectable({
     providedIn: 'root',
@@ -37,6 +43,29 @@ export class MoviesService {
                 throw error;
             }),
         );
+    }
+
+    previewImport(titles: string[]): Observable<MovieImportPreviewResponse> {
+        const body: MovieImportPreviewRequest = { titles };
+        return this.http
+            .post<MovieImportPreviewResponse>(`${this.endpointUrl}/import/preview`, body)
+            .pipe(
+                catchError(error => {
+                    console.error('Error previewing movie import:', error);
+                    throw error;
+                }),
+            );
+    }
+
+    commitImport(body: MovieImportCommitRequest): Observable<MovieImportCommitResponse> {
+        return this.http
+            .post<MovieImportCommitResponse>(`${this.endpointUrl}/import/commit`, body)
+            .pipe(
+                catchError(error => {
+                    console.error('Error committing movie import:', error);
+                    throw error;
+                }),
+            );
     }
 
     updateMovie(id: string, movie: Movie): Observable<Movie> {

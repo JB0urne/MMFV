@@ -1,8 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Movie } from '@mmfv/interfaces';
+import type {
+    Movie,
+    MovieImportCommitRequest,
+    MovieImportCommitResponse,
+    MovieImportPreviewItem,
+    MovieImportPreviewResponse,
+} from '@mmfv/interfaces';
+import { MOVIE_IMPORT_BATCH_SIZE } from '@mmfv/constants';
 import { SqliteService } from '../database/sqlite.service';
 import { TmdbService } from '../tmdb/tmdb.service';
+import { classifyImportTitle, yearFromReleaseDate } from './import-classify';
 
 @Injectable()
 export class MoviesService {
@@ -30,6 +38,87 @@ export class MoviesService {
         }
         const detailedMovie = await this.tmdbService.getMovie(tmdbId);
         return this.add(detailedMovie);
+    }
+
+    async previewImport(titles: string[]): Promise<MovieImportPreviewResponse> {
+        if (!Array.isArray(titles)) {
+            throw new BadRequestException('titles must be an array of strings');
+        }
+
+        const batch = titles
+            .map(title => (typeof title === 'string' ? title.trim() : ''))
+            .filter(title => title.length > 0)
+            .slice(0, MOVIE_IMPORT_BATCH_SIZE);
+
+        const items: MovieImportPreviewItem[] = [];
+
+        for (let index = 0; index < batch.length; index++) {
+            const input = batch[index];
+            const search = await this.tmdbService.searchMovies(input);
+            const classified = classifyImportTitle(input, search.results);
+
+            const item: MovieImportPreviewItem = {
+                input,
+                status: classified.status,
+                candidates: search.results.slice(0, 10),
+            };
+
+            if (classified.status === 'auto' && classified.match) {
+                const year = yearFromReleaseDate(classified.match.releaseDate);
+                item.chosenTmdbId = classified.match.id;
+                item.chosenTitle = classified.match.title;
+                item.chosenYear = year;
+
+                if (this.findOneByTmdbId(classified.match.id)) {
+                    item.status = 'exists';
+                }
+            }
+
+            items.push(item);
+        }
+
+        return { items };
+    }
+
+    async commitImport(body: MovieImportCommitRequest): Promise<MovieImportCommitResponse> {
+        if (!body || !Array.isArray(body.items)) {
+            throw new BadRequestException('items must be an array');
+        }
+
+        const added: Movie[] = [];
+        let skipped = 0;
+
+        for (const item of body.items) {
+            if (!item || typeof item !== 'object' || !('type' in item)) {
+                throw new BadRequestException('each item must have a type');
+            }
+
+            if (item.type === 'tmdb') {
+                if (!Number.isFinite(item.tmdbId)) {
+                    throw new BadRequestException('tmdb items require a numeric tmdbId');
+                }
+                const existing = this.findOneByTmdbId(item.tmdbId);
+                if (existing) {
+                    skipped += 1;
+                    continue;
+                }
+                added.push(await this.addByTmdbId(item.tmdbId));
+                continue;
+            }
+
+            if (item.type === 'title') {
+                const title = typeof item.title === 'string' ? item.title.trim() : '';
+                if (!title) {
+                    throw new BadRequestException('title items require a non-empty title');
+                }
+                added.push(this.add({ id: '', title }));
+                continue;
+            }
+
+            throw new BadRequestException(`unknown commit item type`);
+        }
+
+        return { added, skipped };
     }
 
     findAll(): Movie[] {
