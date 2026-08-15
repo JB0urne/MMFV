@@ -13,7 +13,7 @@
             rows="8"
             [(ngModel)]="rawText"
             placeholder="The Matrix&#10;Inception&#10;Spirited Away"
-            [disabled]="resolveLoading || commitLoading"
+            [disabled]="resolveLoading() || commitLoading()"
         ></textarea>
         <mat-hint>{{ lineCount }} title{{ lineCount === 1 ? '' : 's' }}</mat-hint>
     </mat-form-field>
@@ -24,40 +24,40 @@
             color="primary"
             type="button"
             (click)="onPreview()"
-            [disabled]="lineCount === 0 || resolveLoading || commitLoading"
+            [disabled]="lineCount === 0 || resolveLoading() || commitLoading()"
         >
             Preview list
         </button>
-        @if (previewed && unresolvedCount > 0) {
+        @if (previewed() && unresolvedCount > 0) {
             <button
                 mat-flat-button
                 color="primary"
                 type="button"
                 (click)="onResolveNextBatch()"
-                [disabled]="resolveLoading || commitLoading"
+                [disabled]="resolveLoading() || commitLoading()"
             >
-                @if (resolveLoading) {
+                @if (resolveLoading()) {
                     Resolving…
                 } @else {
                     Resolve next {{ nextBatchSize }}
                 }
             </button>
         }
-        @if (previewed && unresolvedCount === 0 && rows.length > 0) {
+        @if (previewed() && unresolvedCount === 0 && rows().length > 0) {
             <button mat-stroked-button type="button" disabled>All rows resolved</button>
         }
     </div>
 
-    @if (resolveLoading) {
+    @if (resolveLoading()) {
         <div class="search-status">
             <mat-spinner diameter="24"></mat-spinner>
             <span>Resolving batch against TMDB…</span>
         </div>
     }
 
-    @if (resolveError) {
-        <p class="search-error">{{ resolveError }}</p>
-        @if (showOfflineActions) {
+    @if (resolveError()) {
+        <p class="search-error">{{ resolveError() }}</p>
+        @if (showOfflineActions()) {
             <div class="offline-actions">
                 <button mat-stroked-button type="button" (click)="onMarkUnresolvedAsTitleOnly()">
                     Mark remaining as title-only
@@ -67,23 +67,23 @@
         }
     }
 
-    @if (commitError) {
-        <p class="search-error">{{ commitError }}</p>
+    @if (commitError()) {
+        <p class="search-error">{{ commitError() }}</p>
     }
 
-    @if (previewed) {
+    @if (previewed()) {
         <div class="summary">
-            <span>{{ resolvedCount }} / {{ rows.length }} resolved</span>
+            <span>{{ resolvedCount }} / {{ rows().length }} resolved</span>
             <span>· {{ autoCount }} auto</span>
             <span>· {{ needsReviewCount }} need attention</span>
-            <span>· {{ settledCount }} / {{ rows.length }} settled</span>
+            <span>· {{ settledCount }} / {{ rows().length }} settled</span>
         </div>
 
-        @if (rows.length === 0) {
+        @if (rows().length === 0) {
             <p class="empty">No titles to import.</p>
         } @else {
             <ul class="import-rows">
-                @for (row of rows; track row.lineNumber) {
+                @for (row of rows(); track row.lineNumber) {
                     <li class="import-row">
                         <div class="import-row-top">
                             <span class="line-number">{{ row.lineNumber }}.</span>
@@ -108,7 +108,7 @@
                                             type="button"
                                             class="row-action"
                                             (click)="onToggleSearch(row)"
-                                            [disabled]="resolveLoading || commitLoading"
+                                            [disabled]="resolveLoading() || commitLoading()"
                                         >
                                             {{ row.searchOpen ? 'Hide search' : 'Search TMDB' }}
                                         </button>
@@ -117,7 +117,7 @@
                                             type="button"
                                             class="row-action"
                                             (click)="onAcceptTitleOnly(row)"
-                                            [disabled]="resolveLoading || commitLoading"
+                                            [disabled]="resolveLoading() || commitLoading()"
                                         >
                                             Title only
                                         </button>
@@ -126,7 +126,7 @@
                                             type="button"
                                             class="row-action"
                                             (click)="onSkip(row)"
-                                            [disabled]="resolveLoading || commitLoading"
+                                            [disabled]="resolveLoading() || commitLoading()"
                                         >
                                             Skip
                                         </button>
@@ -143,7 +143,7 @@
                                             type="button"
                                             class="row-action"
                                             (click)="onClearChoice(row)"
-                                            [disabled]="resolveLoading || commitLoading"
+                                            [disabled]="resolveLoading() || commitLoading()"
                                         >
                                             Clear
                                         </button>
@@ -164,8 +164,8 @@
                                                     [(ngModel)]="row.searchQuery"
                                                     [disabled]="
                                                         row.searchLoading ||
-                                                        resolveLoading ||
-                                                        commitLoading
+                                                        resolveLoading() ||
+                                                        commitLoading()
                                                     "
                                                     (keydown.enter)="$event.preventDefault(); onSearchRow(row)"
                                                 />
@@ -178,8 +178,8 @@
                                                 (click)="onSearchRow(row)"
                                                 [disabled]="
                                                     row.searchLoading ||
-                                                    resolveLoading ||
-                                                    commitLoading ||
+                                                    resolveLoading() ||
+                                                    commitLoading() ||
                                                     !row.searchQuery.trim()
                                                 "
                                             >
@@ -235,7 +235,7 @@
                                                     type="button"
                                                     class="row-action"
                                                     (click)="onAcceptCandidate(row, result)"
-                                                    [disabled]="commitLoading"
+                                                    [disabled]="commitLoading()"
                                                 >
                                                     {{
                                                         isCatalogTmdbId(result.id)
@@ -259,7 +259,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <button mat-button type="button" (click)="onCancel()" [disabled]="commitLoading">
+    <button mat-button type="button" (click)="onCancel()" [disabled]="commitLoading()">
         Cancel
     </button>
     <button
@@ -267,10 +267,10 @@
         color="primary"
         type="button"
         (click)="onCommit()"
-        [disabled]="!allSettled || commitLoading"
+        [disabled]="!allSettled || commitLoading()"
         [title]="allSettled ? 'Import settled rows' : 'Settle every row before importing'"
     >
-        @if (commitLoading) {
+        @if (commitLoading()) {
             Importing…
         } @else {
             Import ready

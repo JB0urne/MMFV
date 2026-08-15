@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnDestroy, Optional } from '@angular/core';
+import { Component, Inject, OnDestroy, Optional, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -60,14 +60,14 @@ export class ImportMoviesDialogComponent implements OnDestroy {
     readonly batchSize = MOVIE_IMPORT_BATCH_SIZE;
 
     rawText = '';
-    rows: ImportMovieRow[] = [];
-    previewed = false;
+    readonly rows = signal<ImportMovieRow[]>([]);
+    readonly previewed = signal(false);
 
-    resolveLoading = false;
-    commitLoading = false;
-    resolveError: string | null = null;
-    commitError: string | null = null;
-    showOfflineActions = false;
+    readonly resolveLoading = signal(false);
+    readonly commitLoading = signal(false);
+    readonly resolveError = signal<string | null>(null);
+    readonly commitError = signal<string | null>(null);
+    readonly showOfflineActions = signal(false);
 
     private readonly destroy$ = new Subject<void>();
     private readonly catalogByTitle: Map<string, Movie>;
@@ -96,29 +96,30 @@ export class ImportMoviesDialogComponent implements OnDestroy {
     }
 
     get unresolvedCount(): number {
-        return this.rows.filter(r => r.status === 'unresolved').length;
+        return this.rows().filter(r => r.status === 'unresolved').length;
     }
 
     get resolvedCount(): number {
-        return this.rows.length - this.unresolvedCount;
+        return this.rows().length - this.unresolvedCount;
     }
 
     get autoCount(): number {
-        return this.rows.filter(r => r.status === 'auto').length;
+        return this.rows().filter(r => r.status === 'auto').length;
     }
 
     get needsReviewCount(): number {
-        return this.rows.filter(
+        return this.rows().filter(
             r => r.status === 'ambiguous' || r.status === 'none' || r.status === 'unresolved',
         ).length;
     }
 
     get settledCount(): number {
-        return this.rows.filter(r => this.isSettled(r)).length;
+        return this.rows().filter(r => this.isSettled(r)).length;
     }
 
     get allSettled(): boolean {
-        return this.rows.length > 0 && this.rows.every(r => this.isSettled(r));
+        const rows = this.rows();
+        return rows.length > 0 && rows.every(r => this.isSettled(r));
     }
 
     get nextBatchSize(): number {
@@ -127,21 +128,23 @@ export class ImportMoviesDialogComponent implements OnDestroy {
 
     onPreview(): void {
         const lines = this.parseLines(this.rawText);
-        this.rows = lines.map((input, index) => {
-            const row = this.createRow(index + 1, input);
-            const existing = this.catalogByTitle.get(normalizeImportTitle(input));
-            if (existing) {
-                row.status = 'exists';
-                row.chosenTitle = existing.title;
-                row.chosenYear = existing.year;
-                row.chosenTmdbId = existing.tmdbId;
-            }
-            return row;
-        });
-        this.previewed = true;
-        this.resolveError = null;
-        this.commitError = null;
-        this.showOfflineActions = false;
+        this.rows.set(
+            lines.map((input, index) => {
+                const row = this.createRow(index + 1, input);
+                const existing = this.catalogByTitle.get(normalizeImportTitle(input));
+                if (existing) {
+                    row.status = 'exists';
+                    row.chosenTitle = existing.title;
+                    row.chosenYear = existing.year;
+                    row.chosenTmdbId = existing.tmdbId;
+                }
+                return row;
+            }),
+        );
+        this.previewed.set(true);
+        this.resolveError.set(null);
+        this.commitError.set(null);
+        this.showOfflineActions.set(false);
 
         // Resolve the first batch immediately so small imports don't need a second click.
         if (this.unresolvedCount > 0) {
@@ -150,29 +153,32 @@ export class ImportMoviesDialogComponent implements OnDestroy {
     }
 
     onResolveNextBatch(): void {
-        if (this.resolveLoading || this.nextBatchSize === 0) {
+        if (this.resolveLoading() || this.nextBatchSize === 0) {
             return;
         }
 
-        const targets = this.rows.filter(r => r.status === 'unresolved').slice(0, this.batchSize);
+        const targets = this.rows()
+            .filter(r => r.status === 'unresolved')
+            .slice(0, this.batchSize);
         const titles = targets.map(r => r.input);
 
-        this.resolveLoading = true;
-        this.resolveError = null;
-        this.showOfflineActions = false;
+        this.resolveLoading.set(true);
+        this.resolveError.set(null);
+        this.showOfflineActions.set(false);
 
         this.moviesService
             .previewImport(titles)
             .pipe(
                 catchError(error => {
-                    this.resolveError =
+                    this.resolveError.set(
                         error?.error?.message ??
-                        'TMDB resolve failed. Abort, or mark remaining as title-only.';
-                    this.showOfflineActions = true;
+                            'TMDB resolve failed. Abort, or mark remaining as title-only.',
+                    );
+                    this.showOfflineActions.set(true);
                     return of(null);
                 }),
                 finalize(() => {
-                    this.resolveLoading = false;
+                    this.resolveLoading.set(false);
                 }),
                 takeUntil(this.destroy$),
             )
@@ -193,6 +199,7 @@ export class ImportMoviesDialogComponent implements OnDestroy {
                     row.searchError = null;
                     this.applyCatalogDedup(row);
                 });
+                this.rows.update(rows => [...rows]);
             });
     }
 
@@ -224,12 +231,14 @@ export class ImportMoviesDialogComponent implements OnDestroy {
                 }),
                 finalize(() => {
                     row.searchLoading = false;
+                    this.rows.update(rows => [...rows]);
                 }),
                 takeUntil(this.destroy$),
             )
             .subscribe(response => {
                 if (response) {
                     row.candidates = response.results;
+                    this.rows.update(rows => [...rows]);
                 }
             });
     }
@@ -273,7 +282,7 @@ export class ImportMoviesDialogComponent implements OnDestroy {
     }
 
     onMarkUnresolvedAsTitleOnly(): void {
-        for (const row of this.rows) {
+        for (const row of this.rows()) {
             if (
                 row.status === 'unresolved' ||
                 row.status === 'ambiguous' ||
@@ -282,8 +291,9 @@ export class ImportMoviesDialogComponent implements OnDestroy {
                 this.onAcceptTitleOnly(row);
             }
         }
-        this.showOfflineActions = false;
-        this.resolveError = null;
+        this.showOfflineActions.set(false);
+        this.resolveError.set(null);
+        this.rows.update(rows => [...rows]);
     }
 
     statusLabel(status: ImportRowStatus): string {
@@ -331,12 +341,12 @@ export class ImportMoviesDialogComponent implements OnDestroy {
     }
 
     onCommit(): void {
-        if (!this.allSettled || this.commitLoading) {
+        if (!this.allSettled || this.commitLoading()) {
             return;
         }
 
         const items: MovieImportCommitItem[] = [];
-        for (const row of this.rows) {
+        for (const row of this.rows()) {
             if (row.status === 'skipped' || row.status === 'exists') {
                 continue;
             }
@@ -349,19 +359,20 @@ export class ImportMoviesDialogComponent implements OnDestroy {
             }
         }
 
-        this.commitLoading = true;
-        this.commitError = null;
+        this.commitLoading.set(true);
+        this.commitError.set(null);
 
         this.moviesService
             .commitImport({ items })
             .pipe(
                 catchError(error => {
-                    this.commitError =
-                        error?.error?.message ?? 'Import commit failed. Try again.';
+                    this.commitError.set(
+                        error?.error?.message ?? 'Import commit failed. Try again.',
+                    );
                     return of(null);
                 }),
                 finalize(() => {
-                    this.commitLoading = false;
+                    this.commitLoading.set(false);
                 }),
                 takeUntil(this.destroy$),
             )
