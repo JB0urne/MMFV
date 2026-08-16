@@ -1,5 +1,5 @@
 /** Max titles resolved per `POST /api/movies/import/preview` call. */
-export const MOVIE_IMPORT_BATCH_SIZE = 40;
+export const MOVIE_IMPORT_BATCH_SIZE = 20;
 
 /**
  * TMDB `language` for search (and thus the localized `title` used for import auto-match).
