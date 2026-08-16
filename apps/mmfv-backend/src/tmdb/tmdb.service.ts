@@ -1,5 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { TMDB_SEARCH_LANGUAGE } from '@mmfv/constants';
 import type { Movie, MovieTmdb, MovieTmdbSearchResponse } from '@mmfv/interfaces';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -51,6 +52,7 @@ export class TmdbService {
         url.searchParams.set('query', query);
         url.searchParams.set('page', String(page));
         url.searchParams.set('include_adult', 'false');
+        url.searchParams.set('language', TMDB_SEARCH_LANGUAGE);
 
         const response = await this.fetchOnce(url, 'TMDB search');
         const data = (await response.json()) as TmdbSearchResponseRaw;

@@ -16,6 +16,7 @@ export type ImportClassification = {
 
 /**
  * Exact case-insensitive match on TMDB `title` or `originalTitle`.
+ * With search `language` (e.g. de-DE), `title` is the translated name when available.
  * Multiple exact hits → ambiguous. Zero results → none.
  */
 export function classifyImportTitle(query: string, results: MovieTmdb[]): ImportClassification {
