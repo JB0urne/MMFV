@@ -21,31 +21,31 @@
             color="primary"
             type="button"
             (click)="onUpdateWithTmdb()"
-            [disabled]="searchLoading || !title.trim()"
+            [disabled]="searchLoading() || !title.trim()"
         >
             Update with TMDB
         </button>
     </div>
 
-    @if (searchLoading) {
+    @if (searchLoading()) {
         <div class="search-status">
             <mat-spinner diameter="24"></mat-spinner>
             <span>Searching TMDB…</span>
         </div>
     }
 
-    @if (searchError) {
-        <p class="search-error">{{ searchError }}</p>
+    @if (searchError(); as error) {
+        <p class="search-error">{{ error }}</p>
     }
 
-    @if (!searchLoading && searched && proposals.length === 0 && !searchError) {
+    @if (!searchLoading() && searched() && proposals().length === 0 && !searchError()) {
         <p class="search-empty">No TMDB results for "{{ title.trim() }}".</p>
     }
 
-    @if (proposals.length > 0) {
+    @if (proposals().length > 0) {
         <p class="proposals-label">TMDB proposals — accept one to fill the form, then Save:</p>
         <ul class="search-results">
-            @for (result of proposals; track result.id) {
+            @for (result of proposals(); track result.id) {
                 <li class="search-result">
                     <div class="search-result-info">
                         <strong>{{ result.title }}</strong>

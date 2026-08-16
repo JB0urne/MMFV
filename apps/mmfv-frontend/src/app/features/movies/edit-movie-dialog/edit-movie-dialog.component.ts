@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnDestroy } from '@angular/core';
+import { Component, Inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -43,10 +43,10 @@ export class EditMovieDialogComponent implements OnDestroy {
     year: number;
     tmdbId?: number;
 
-    proposals: MovieTmdb[] = [];
-    searchLoading = false;
-    searchError: string | null = null;
-    searched = false;
+    readonly proposals = signal<MovieTmdb[]>([]);
+    readonly searchLoading = signal(false);
+    readonly searchError = signal<string | null>(null);
+    readonly searched = signal(false);
 
     private readonly destroy$ = new Subject<void>();
 
@@ -72,33 +72,34 @@ export class EditMovieDialogComponent implements OnDestroy {
     onUpdateWithTmdb(): void {
         const query = this.title.trim();
         if (!query) {
-            this.searchError = 'Enter a title to search TMDB.';
-            this.proposals = [];
-            this.searched = false;
+            this.searchError.set('Enter a title to search TMDB.');
+            this.proposals.set([]);
+            this.searched.set(false);
             return;
         }
 
-        this.searchLoading = true;
-        this.searchError = null;
-        this.searched = true;
-        this.proposals = [];
+        this.searchLoading.set(true);
+        this.searchError.set(null);
+        this.searched.set(true);
+        this.proposals.set([]);
 
         this.tmdbService
             .searchMovies(query)
             .pipe(
                 catchError(error => {
-                    this.searchError =
-                        error?.error?.message ?? 'Search failed. Check that TMDB_API_KEY is configured.';
+                    this.searchError.set(
+                        error?.error?.message ?? 'Search failed. Check that TMDB_API_KEY is configured.',
+                    );
                     return of(null);
                 }),
                 finalize(() => {
-                    this.searchLoading = false;
+                    this.searchLoading.set(false);
                 }),
                 takeUntil(this.destroy$),
             )
             .subscribe(response => {
                 if (response) {
-                    this.proposals = response.results;
+                    this.proposals.set(response.results);
                 }
             });
     }
@@ -121,9 +122,9 @@ export class EditMovieDialogComponent implements OnDestroy {
         this.title = nextTitle;
         this.year = nextYear;
         this.tmdbId = nextTmdbId;
-        this.proposals = [];
-        this.searched = false;
-        this.searchError = null;
+        this.proposals.set([]);
+        this.searched.set(false);
+        this.searchError.set(null);
     }
 
     releaseYear(releaseDate: string): string {
