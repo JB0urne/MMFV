@@ -24,5 +24,6 @@ NestJS + SQLite API. Nx name: **`mmfv-backend`**. Global prefix `/api`. Update w
 ## Conventions
 
 - Domain types from `@mmfv/interfaces` — do not duplicate `Movie`.
+- Movies store `original_title` + JSON `titles` (`TranslationObject[]`, unique language per movie). List display prefers DE then original.
 - Thin controllers; SQL/business logic in services.
 - New movie IDs: `randomUUID()`.

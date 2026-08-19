@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MoviesService, TmdbService } from '@mmfv/frontend/data-access/movies';
 import { MOVIE_IMPORT_BATCH_SIZE } from '@mmfv/constants';
 import { Movie, MovieImportCommitItem, MovieTmdb } from '@mmfv/interfaces';
+import { displayMovieTitle, movieMatchKeys, normalizeMovieTitle } from '@mmfv/utils';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 
@@ -131,10 +132,10 @@ export class ImportMoviesDialogComponent implements OnDestroy {
         this.rows.set(
             lines.map((input, index) => {
                 const row = this.createRow(index + 1, input);
-                const existing = this.catalogByTitle.get(normalizeImportTitle(input));
+                const existing = this.catalogByTitle.get(normalizeMovieTitle(input));
                 if (existing) {
                     row.status = 'exists';
-                    row.chosenTitle = existing.title;
+                    row.chosenTitle = displayMovieTitle(existing);
                     row.chosenYear = existing.year;
                     row.chosenTmdbId = existing.tmdbId;
                 }
@@ -426,16 +427,13 @@ export class ImportMoviesDialogComponent implements OnDestroy {
     }
 }
 
-function normalizeImportTitle(value: string): string {
-    return value.trim().replace(/\s+/g, ' ').toLowerCase();
-}
-
 function buildCatalogTitleIndex(catalog: Movie[]): Map<string, Movie> {
     const index = new Map<string, Movie>();
     for (const movie of catalog) {
-        const key = normalizeImportTitle(movie.title);
-        if (key && !index.has(key)) {
-            index.set(key, movie);
+        for (const key of movieMatchKeys(movie)) {
+            if (key && !index.has(key)) {
+                index.set(key, movie);
+            }
         }
     }
     return index;

@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TmdbService } from '@mmfv/frontend/data-access/movies';
 import { Movie, MovieTmdb } from '@mmfv/interfaces';
+import { displayMovieTitle } from '@mmfv/utils';
 import { Observable, Subject, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, finalize, switchMap, takeUntil, tap } from 'rxjs/operators';
 
@@ -43,6 +44,8 @@ export class ListViewComponent implements OnDestroy {
     @Output() addTmdbMovie = new EventEmitter<number>();
     @Output() editMovie = new EventEmitter<Movie>();
     @Output() deleteMovie = new EventEmitter<Movie>();
+
+    readonly displayTitle = displayMovieTitle;
 
     searchQuery = '';
     searchResults: MovieTmdb[] = [];

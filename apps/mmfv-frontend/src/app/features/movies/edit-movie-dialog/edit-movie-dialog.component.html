@@ -2,17 +2,41 @@
 
 <mat-dialog-content class="dialog-content">
     <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Title</mat-label>
-        <input matInput [(ngModel)]="title" />
+        <mat-label>Original title</mat-label>
+        <input matInput [(ngModel)]="movie.originalTitle" />
     </mat-form-field>
+
+    @if (hasTitle('DE')) {
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>German title</mat-label>
+            <input
+                matInput
+                [ngModel]="titleValue('DE')"
+                (ngModelChange)="setTitleValue('DE', $event)"
+            />
+            <mat-hint>Clear to remove the German translation</mat-hint>
+        </mat-form-field>
+    }
+
+    @if (hasTitle('EN')) {
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>English title</mat-label>
+            <input
+                matInput
+                [ngModel]="titleValue('EN')"
+                (ngModelChange)="setTitleValue('EN', $event)"
+            />
+            <mat-hint>Clear to remove the English translation</mat-hint>
+        </mat-form-field>
+    }
 
     <mat-form-field appearance="outline" class="full-width">
         <mat-label>Year</mat-label>
-        <input matInput type="number" [(ngModel)]="year" />
+        <input matInput type="number" [(ngModel)]="movie.year" />
     </mat-form-field>
 
-    @if (tmdbId != null) {
-        <p class="tmdb-id-hint">TMDB ID: {{ tmdbId }}</p>
+    @if (movie.tmdbId != null) {
+        <p class="tmdb-id-hint">TMDB ID: {{ movie.tmdbId }}</p>
     }
 
     <div class="tmdb-actions">
@@ -21,7 +45,10 @@
             color="primary"
             type="button"
             (click)="onUpdateWithTmdb()"
-            [disabled]="searchLoading() || !title.trim()"
+            [disabled]="
+                searchLoading() ||
+                !(movie.originalTitle.trim() || titleValue('DE').trim() || titleValue('EN').trim())
+            "
         >
             Update with TMDB
         </button>
@@ -39,7 +66,9 @@
     }
 
     @if (!searchLoading() && searched() && proposals().length === 0 && !searchError()) {
-        <p class="search-empty">No TMDB results for "{{ title.trim() }}".</p>
+        <p class="search-empty">
+            No TMDB results for "{{ movie.originalTitle.trim() || titleValue('DE').trim() || titleValue('EN').trim() }}".
+        </p>
     }
 
     @if (proposals().length > 0) {

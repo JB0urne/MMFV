@@ -4,6 +4,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MoviesService } from '@mmfv/frontend/data-access/movies';
 import { Movie } from '@mmfv/interfaces';
+import { displayMovieTitle } from '@mmfv/utils';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { catchError, finalize, map, take, tap } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header.component';
@@ -117,25 +118,15 @@ export class AppComponent implements OnInit {
     onEditMovie(movie: Movie) {
         const dialogRef = this.dialog.open(EditMovieDialogComponent, {
             width: '560px',
-            data: {
-                title: movie.title,
-                year: movie.year,
-                tmdbId: movie.tmdbId,
-            },
+            data: movie,
         });
 
         dialogRef.afterClosed().subscribe(result => {
             if (!result) {
                 return;
             }
-            const updatedMovie: Movie = {
-                ...movie,
-                title: result.title,
-                year: result.year,
-                tmdbId: result.tmdbId,
-            };
             this.moviesService
-                .updateMovie(movie.id, updatedMovie)
+                .updateMovie(movie.id, result)
                 .pipe(
                     tap(updated => {
                         const movies = this.moviesSubject.value;
@@ -143,7 +134,9 @@ export class AppComponent implements OnInit {
                         if (idx >= 0) {
                             const next = [...movies];
                             next[idx] = updated;
-                            next.sort((a, b) => a.title.localeCompare(b.title));
+                            next.sort((a, b) =>
+                                displayMovieTitle(a).localeCompare(displayMovieTitle(b)),
+                            );
                             this.moviesSubject.next(next);
                         } else {
                             this.loadMovies();

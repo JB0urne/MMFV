@@ -2,6 +2,7 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TMDB_SEARCH_LANGUAGE } from '@mmfv/constants';
 import type { Movie, MovieTmdb, MovieTmdbSearchResponse } from '@mmfv/interfaces';
+import { titlesFromLocalized } from '@mmfv/utils';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -30,6 +31,7 @@ type TmdbSearchResponseRaw = {
 type TmdbMovieDetailsRaw = {
     id: number;
     title: string;
+    original_title: string;
     release_date: string;
 };
 
@@ -52,6 +54,7 @@ export class TmdbService {
         url.searchParams.set('query', query);
         url.searchParams.set('page', String(page));
         url.searchParams.set('include_adult', 'false');
+        // Localized `title` for auto-match; search still finds original/alt titles.
         url.searchParams.set('language', TMDB_SEARCH_LANGUAGE);
 
         const response = await this.fetchOnce(url, 'TMDB search');
@@ -66,6 +69,7 @@ export class TmdbService {
 
     async getMovie(tmdbId: number): Promise<Movie> {
         const url = new URL(`${TMDB_BASE_URL}/movie/${tmdbId}`);
+        url.searchParams.set('language', TMDB_SEARCH_LANGUAGE);
         const response = await this.fetchOnce(url, 'TMDB movie lookup');
         const data = (await response.json()) as TmdbMovieDetailsRaw;
         return mapTmdbDetailsToMovie(data);
@@ -113,9 +117,11 @@ function mapMovieTmdb(raw: TmdbSearchMovieRaw): MovieTmdb {
 /** TMDB `/movie/{id}` details → app `Movie` (local `id` assigned on insert). */
 function mapTmdbDetailsToMovie(raw: TmdbMovieDetailsRaw): Movie {
     const year = raw.release_date ? Number.parseInt(raw.release_date.slice(0, 4), 10) : 0;
+    const originalTitle = (raw.original_title || raw.title || '').trim();
     return {
         id: '',
-        title: raw.title,
+        originalTitle,
+        titles: titlesFromLocalized(originalTitle, raw.title ?? ''),
         tmdbId: raw.id,
         year: Number.isFinite(year) ? year : 0,
     };

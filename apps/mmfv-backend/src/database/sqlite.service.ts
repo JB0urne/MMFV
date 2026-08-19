@@ -1,9 +1,20 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { Movie, StrictMovie } from '@mmfv/interfaces';
+import type { Movie, StrictMovie, TranslationObject } from '@mmfv/interfaces';
+import { sanitizeTitles } from '@mmfv/utils';
 import Database from 'better-sqlite3';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { dirname } from 'path';
+
+type MovieRow = {
+    id: string;
+    original_title: string;
+    titles: string;
+    tmdb_id: number | null;
+    year: number | null;
+    created_at: string | null;
+    updated_at: string | null;
+};
 
 @Injectable()
 export class SqliteService implements OnModuleInit, OnModuleDestroy {
@@ -23,7 +34,8 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         this.db.exec(`
             CREATE TABLE IF NOT EXISTS movies (
                 id TEXT PRIMARY KEY,
-                title TEXT NOT NULL,
+                original_title TEXT NOT NULL,
+                titles TEXT NOT NULL DEFAULT '[]',
                 tmdb_id INTEGER UNIQUE,
                 year INTEGER,
                 created_at TEXT,
@@ -48,14 +60,15 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         }
         const raw = JSON.parse(readFileSync(seedPath, 'utf-8')) as StrictMovie[];
         const insert = this.db.prepare(
-            `INSERT INTO movies (id, title, tmdb_id, year, created_at, updated_at)
-             VALUES (@id, @title, @tmdb_id, @year, @created_at, @updated_at)`,
+            `INSERT INTO movies (id, original_title, titles, tmdb_id, year, created_at, updated_at)
+             VALUES (@id, @original_title, @titles, @tmdb_id, @year, @created_at, @updated_at)`,
         );
         const tx = this.db.transaction((rows: StrictMovie[]) => {
             for (const r of rows) {
                 insert.run({
                     id: r.id,
-                    title: r.title,
+                    original_title: r.originalTitle,
+                    titles: JSON.stringify(sanitizeTitles(r.titles ?? [])),
                     tmdb_id: r.tmdbId ?? null,
                     year: r.year ?? null,
                     created_at: r.createdAt ?? null,
@@ -74,21 +87,24 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
         return value;
     }
 
-    rowToMovie(row: {
-        id: string;
-        title: string;
-        tmdb_id: number | null;
-        year: number | null;
-        created_at: string | null;
-        updated_at: string | null;
-    }): Movie {
+    rowToMovie(row: MovieRow): Movie {
         return {
             id: row.id,
-            title: row.title,
+            originalTitle: row.original_title,
+            titles: parseTitlesJson(row.titles),
             ...(row.tmdb_id != null ? { tmdbId: row.tmdb_id } : {}),
             ...(row.year != null ? { year: row.year } : {}),
             ...(row.created_at != null ? { createdAt: row.created_at } : {}),
             ...(row.updated_at != null ? { updatedAt: row.updated_at } : {}),
         };
+    }
+}
+
+function parseTitlesJson(raw: string): TranslationObject[] {
+    try {
+        const parsed = JSON.parse(raw || '[]') as unknown;
+        return sanitizeTitles(Array.isArray(parsed) ? (parsed as TranslationObject[]) : []);
+    } catch {
+        return [];
     }
 }

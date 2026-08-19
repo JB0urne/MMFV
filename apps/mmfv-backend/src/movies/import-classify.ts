@@ -1,8 +1,5 @@
 import type { MovieTmdb, MovieImportPreviewStatus } from '@mmfv/interfaces';
-
-export function normalizeImportTitle(value: string): string {
-    return value.trim().replace(/\s+/g, ' ').toLowerCase();
-}
+import { normalizeMovieTitle } from '@mmfv/utils';
 
 export function yearFromReleaseDate(releaseDate: string | undefined): number {
     const year = releaseDate ? Number.parseInt(releaseDate.slice(0, 4), 10) : 0;
@@ -20,15 +17,15 @@ export type ImportClassification = {
  * Multiple exact hits → ambiguous. Zero results → none.
  */
 export function classifyImportTitle(query: string, results: MovieTmdb[]): ImportClassification {
-    const normalized = normalizeImportTitle(query);
+    const normalized = normalizeMovieTitle(query);
     if (!normalized) {
         return { status: 'none' };
     }
 
     const exactMatches = results.filter(result => {
         return (
-            normalizeImportTitle(result.title) === normalized ||
-            normalizeImportTitle(result.originalTitle) === normalized
+            normalizeMovieTitle(result.title) === normalized ||
+            normalizeMovieTitle(result.originalTitle) === normalized
         );
     });
 

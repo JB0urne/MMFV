@@ -1,6 +1,9 @@
+import type { TranslationObject } from '../i18n/translation.interface';
+
 export interface BaseMovie {
     id: string;
-    title: string;
+    originalTitle: string;
+    titles: TranslationObject[];
 }
 
 export interface Movie extends BaseMovie {

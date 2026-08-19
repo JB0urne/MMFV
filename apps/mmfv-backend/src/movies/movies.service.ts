@@ -7,6 +7,7 @@ import type {
     MovieImportPreviewItem,
     MovieImportPreviewResponse,
 } from '@mmfv/interfaces';
+import { displayMovieTitle, sanitizeTitles } from '@mmfv/utils';
 import { MOVIE_IMPORT_BATCH_SIZE } from '@mmfv/constants';
 import { SqliteService } from '../database/sqlite.service';
 import { TmdbService } from '../tmdb/tmdb.service';
@@ -22,12 +23,25 @@ export class MoviesService {
     add(movie: Movie): Movie {
         const now = new Date().toISOString();
         const id = randomUUID();
+        const originalTitle = typeof movie.originalTitle === 'string' ? movie.originalTitle.trim() : '';
+        if (!originalTitle) {
+            throw new BadRequestException('originalTitle is required');
+        }
+        const titles = sanitizeTitles(movie.titles ?? []);
         this.sqlite.database
             .prepare(
-                `INSERT INTO movies (id, title, tmdb_id, year, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO movies (id, original_title, titles, tmdb_id, year, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
             )
-            .run(id, movie.title, movie.tmdbId ?? null, movie.year ?? null, now, now);
+            .run(
+                id,
+                originalTitle,
+                JSON.stringify(titles),
+                movie.tmdbId ?? null,
+                movie.year ?? null,
+                now,
+                now,
+            );
         return this.findOneById(id) as Movie;
     }
 
@@ -111,7 +125,7 @@ export class MoviesService {
                 if (!title) {
                     throw new BadRequestException('title items require a non-empty title');
                 }
-                added.push(this.add({ id: '', title }));
+                added.push(this.add({ id: '', originalTitle: title, titles: [] }));
                 continue;
             }
 
@@ -124,17 +138,20 @@ export class MoviesService {
     findAll(): Movie[] {
         const rows = this.sqlite.database
             .prepare(
-                `SELECT id, title, tmdb_id, year, created_at, updated_at FROM movies ORDER BY title`,
+                `SELECT id, original_title, titles, tmdb_id, year, created_at, updated_at FROM movies`,
             )
             .all() as Array<{
             id: string;
-            title: string;
+            original_title: string;
+            titles: string;
             tmdb_id: number | null;
             year: number | null;
             created_at: string | null;
             updated_at: string | null;
         }>;
-        return rows.map(r => this.sqlite.rowToMovie(r));
+        return rows
+            .map(r => this.sqlite.rowToMovie(r))
+            .sort((a, b) => displayMovieTitle(a).localeCompare(displayMovieTitle(b)));
     }
 
     update(id: string, movie: Movie): Movie | null {
@@ -142,12 +159,17 @@ export class MoviesService {
         if (!existing) {
             return null;
         }
+        const originalTitle = typeof movie.originalTitle === 'string' ? movie.originalTitle.trim() : '';
+        if (!originalTitle) {
+            throw new BadRequestException('originalTitle is required');
+        }
+        const titles = sanitizeTitles(movie.titles ?? []);
         const now = new Date().toISOString();
         this.sqlite.database
             .prepare(
-                `UPDATE movies SET title = ?, tmdb_id = ?, year = ?, updated_at = ? WHERE id = ?`,
+                `UPDATE movies SET original_title = ?, titles = ?, tmdb_id = ?, year = ?, updated_at = ? WHERE id = ?`,
             )
-            .run(movie.title, movie.tmdbId ?? null, movie.year ?? null, now, id);
+            .run(originalTitle, JSON.stringify(titles), movie.tmdbId ?? null, movie.year ?? null, now, id);
         return this.findOneById(id);
     }
 
@@ -159,12 +181,13 @@ export class MoviesService {
     private findOneById(id: string): Movie | null {
         const row = this.sqlite.database
             .prepare(
-                `SELECT id, title, tmdb_id, year, created_at, updated_at FROM movies WHERE id = ?`,
+                `SELECT id, original_title, titles, tmdb_id, year, created_at, updated_at FROM movies WHERE id = ?`,
             )
             .get(id) as
             | {
                   id: string;
-                  title: string;
+                  original_title: string;
+                  titles: string;
                   tmdb_id: number | null;
                   year: number | null;
                   created_at: string | null;
@@ -177,12 +200,13 @@ export class MoviesService {
     private findOneByTmdbId(tmdbId: number): Movie | null {
         const row = this.sqlite.database
             .prepare(
-                `SELECT id, title, tmdb_id, year, created_at, updated_at FROM movies WHERE tmdb_id = ?`,
+                `SELECT id, original_title, titles, tmdb_id, year, created_at, updated_at FROM movies WHERE tmdb_id = ?`,
             )
             .get(tmdbId) as
             | {
                   id: string;
-                  title: string;
+                  original_title: string;
+                  titles: string;
                   tmdb_id: number | null;
                   year: number | null;
                   created_at: string | null;

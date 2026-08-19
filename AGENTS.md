@@ -12,6 +12,7 @@ Do **not** run `npm install` / package changes or start servers (`npm run app`, 
 
 - Shared types → `libs/shared/interfaces` (`@mmfv/interfaces`).
 - Shared constants → `libs/shared/constants` (`@mmfv/constants`).
+- Shared pure helpers → `libs/shared/utils` (`@mmfv/utils`).
 - Reusable Angular code → `libs/frontend/` (see `.cursor/skills/angular-component-placement/SKILL.md`).
 - New Angular components: separate `.ts` / `.html` / `.css`; standalone preferred.
 - API prefix `/api`; frontend calls `/api/...` (dev proxy → backend).
@@ -28,6 +29,8 @@ Can be found in tsconfig.base.json
 | Movie list / edit UI | `apps/mmfv-frontend/src/app/` |
 | HTTP clients | `libs/frontend/data-access/movies` |
 | Movie types | `libs/shared/interfaces/src/lib/movies/` |
+| Movie title helpers | `libs/shared/utils/src/lib/movies/` |
+| `Language` / `TranslationObject` | `libs/shared/interfaces/src/lib/i18n/` |
 | REST + SQLite | `apps/mmfv-backend/src/movies/`, `.../database/` |
 | TMDB proxy | `apps/mmfv-backend/src/tmdb/` |
 
@@ -39,4 +42,5 @@ Can be found in tsconfig.base.json
 | `apps/mmfv-backend` | `mmfv-backend` |
 | `libs/shared/interfaces` | `interfaces` |
 | `libs/shared/constants` | `constants` |
+| `libs/shared/utils` | `utils` |
 | `libs/frontend/data-access/movies` | `frontend-data-access-movies` |

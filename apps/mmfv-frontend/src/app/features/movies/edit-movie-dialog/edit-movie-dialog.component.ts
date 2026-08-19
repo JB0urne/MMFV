@@ -7,21 +7,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TmdbService } from '@mmfv/frontend/data-access/movies';
-import { MovieTmdb } from '@mmfv/interfaces';
+import { Language, Movie, MovieTmdb } from '@mmfv/interfaces';
+import { normalizeMovieTitle, sanitizeTitles, titlesFromLocalized } from '@mmfv/utils';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
-
-type EditMovieDialogData = {
-    title: string;
-    year?: number;
-    tmdbId?: number;
-};
-
-type EditMovieDialogResult = {
-    title: string;
-    year: number;
-    tmdbId?: number;
-};
 
 @Component({
     selector: 'app-edit-movie-dialog',
@@ -39,9 +28,8 @@ type EditMovieDialogResult = {
     styleUrl: './edit-movie-dialog.component.css',
 })
 export class EditMovieDialogComponent implements OnDestroy {
-    title: string;
-    year: number;
-    tmdbId?: number;
+    /** Working copy of the catalog movie (cloned so Cancel does not mutate the list). */
+    movie: Movie;
 
     readonly proposals = signal<MovieTmdb[]>([]);
     readonly searchLoading = signal(false);
@@ -51,13 +39,12 @@ export class EditMovieDialogComponent implements OnDestroy {
     private readonly destroy$ = new Subject<void>();
 
     constructor(
-        @Inject(MAT_DIALOG_DATA) data: EditMovieDialogData,
-        private dialogRef: MatDialogRef<EditMovieDialogComponent, EditMovieDialogResult | null>,
+        @Inject(MAT_DIALOG_DATA) data: Movie,
+        private dialogRef: MatDialogRef<EditMovieDialogComponent, Movie | null>,
         private tmdbService: TmdbService,
     ) {
-        this.title = data.title;
-        this.year = data.year ?? 0;
-        this.tmdbId = data.tmdbId;
+        this.movie = structuredClone(data);
+        this.movie.titles = sanitizeTitles(this.movie.titles ?? []);
     }
 
     ngOnDestroy(): void {
@@ -65,12 +52,36 @@ export class EditMovieDialogComponent implements OnDestroy {
         this.destroy$.complete();
     }
 
+    hasTitle(language: Language): boolean {
+        return this.movie.titles.some(t => t.language === language);
+    }
+
+    titleValue(language: Language): string {
+        return this.movie.titles.find(t => t.language === language)?.value ?? '';
+    }
+
+    setTitleValue(language: Language, value: string): void {
+        this.movie.titles = sanitizeTitles([
+            ...this.movie.titles.filter(t => t.language !== language),
+            ...(value.trim() ? [{ language, value }] : []),
+        ]);
+    }
+
     isValid(): boolean {
-        return this.title.trim().length > 0 && Number.isFinite(this.year);
+        if (this.movie.originalTitle.trim().length === 0) {
+            return false;
+        }
+        if (this.movie.year == null) {
+            return true;
+        }
+        return Number.isFinite(this.movie.year);
     }
 
     onUpdateWithTmdb(): void {
-        const query = this.title.trim();
+        const query =
+            this.movie.originalTitle.trim() ||
+            this.titleValue('DE').trim() ||
+            this.titleValue('EN').trim();
         if (!query) {
             this.searchError.set('Enter a title to search TMDB.');
             this.proposals.set([]);
@@ -88,7 +99,8 @@ export class EditMovieDialogComponent implements OnDestroy {
             .pipe(
                 catchError(error => {
                     this.searchError.set(
-                        error?.error?.message ?? 'Search failed. Check that TMDB_API_KEY is configured.',
+                        error?.error?.message ??
+                            'Search failed. Check that TMDB_API_KEY is configured.',
                     );
                     return of(null);
                 }),
@@ -105,11 +117,12 @@ export class EditMovieDialogComponent implements OnDestroy {
     }
 
     onAcceptProposal(result: MovieTmdb): void {
-        const nextTitle = result.title.trim();
+        const nextOriginal = (result.originalTitle || result.title).trim();
         const nextYear = this.yearFromReleaseDate(result.releaseDate);
         const nextTmdbId = result.id;
+        const nextDeTitles = titlesFromLocalized(nextOriginal, result.title);
 
-        const overwritten = this.overwrittenFields(nextTitle, nextYear, nextTmdbId);
+        const overwritten = this.overwrittenFields(nextOriginal, nextYear, nextTmdbId);
         if (overwritten.length > 0) {
             const confirmed = window.confirm(
                 `This will overwrite the current ${overwritten.join(', ')}. Continue?`,
@@ -119,9 +132,13 @@ export class EditMovieDialogComponent implements OnDestroy {
             }
         }
 
-        this.title = nextTitle;
-        this.year = nextYear;
-        this.tmdbId = nextTmdbId;
+        this.movie.originalTitle = nextOriginal;
+        this.movie.year = nextYear;
+        this.movie.tmdbId = nextTmdbId;
+
+        const kept = this.movie.titles.filter(t => t.language !== 'DE');
+        this.movie.titles = sanitizeTitles([...kept, ...nextDeTitles]);
+
         this.proposals.set([]);
         this.searched.set(false);
         this.searchError.set(null);
@@ -139,27 +156,44 @@ export class EditMovieDialogComponent implements OnDestroy {
         if (!this.isValid()) {
             return;
         }
-        this.dialogRef.close({
-            title: this.title.trim(),
-            year: this.year,
-            tmdbId: this.tmdbId,
-        });
+        this.movie.originalTitle = this.movie.originalTitle.trim();
+        this.movie.titles = sanitizeTitles(this.movie.titles);
+        this.movie.year = this.normalizeYear(this.movie.year);
+        this.dialogRef.close(this.movie);
     }
 
-    private yearFromReleaseDate(releaseDate: string): number {
-        const year = releaseDate ? Number.parseInt(releaseDate.slice(0, 4), 10) : 0;
-        return Number.isFinite(year) ? year : 0;
-    }
-
-    private overwrittenFields(nextTitle: string, nextYear: number, nextTmdbId: number): string[] {
-        const fields: string[] = [];
-        if (this.title.trim() && this.title.trim() !== nextTitle) {
-            fields.push('title');
+    private normalizeYear(value: unknown): number | undefined {
+        if (value == null || value === '') {
+            return undefined;
         }
-        if (Number.isFinite(this.year) && this.year !== 0 && this.year !== nextYear) {
+        const year = typeof value === 'number' ? value : Number.parseInt(String(value), 10);
+        return Number.isFinite(year) ? year : undefined;
+    }
+
+    private yearFromReleaseDate(releaseDate: string): number | undefined {
+        if (!releaseDate) {
+            return undefined;
+        }
+        const year = Number.parseInt(releaseDate.slice(0, 4), 10);
+        return Number.isFinite(year) ? year : undefined;
+    }
+
+    private overwrittenFields(
+        nextOriginal: string,
+        nextYear: number | undefined,
+        nextTmdbId: number,
+    ): string[] {
+        const fields: string[] = [];
+        if (
+            this.movie.originalTitle.trim() &&
+            normalizeMovieTitle(this.movie.originalTitle) !== normalizeMovieTitle(nextOriginal)
+        ) {
+            fields.push('original title');
+        }
+        if (this.movie.year != null && this.movie.year !== nextYear) {
             fields.push('year');
         }
-        if (this.tmdbId != null && this.tmdbId !== nextTmdbId) {
+        if (this.movie.tmdbId != null && this.movie.tmdbId !== nextTmdbId) {
             fields.push('TMDB ID');
         }
         return fields;

@@ -27,7 +27,12 @@ export class MoviesService {
         );
     }
 
-    addMovie(movie: { title: string; tmdbId: number; year: number }): Observable<Movie> {
+    addMovie(movie: {
+        originalTitle: string;
+        titles?: Movie['titles'];
+        tmdbId: number;
+        year: number;
+    }): Observable<Movie> {
         return this.http.post<Movie>(this.endpointUrl, movie).pipe(
             catchError(error => {
                 console.error('Error adding movie:', error);
