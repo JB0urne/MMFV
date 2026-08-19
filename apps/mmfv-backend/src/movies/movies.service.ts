@@ -8,7 +8,10 @@ import type {
     MovieImportPreviewResponse,
 } from '@mmfv/interfaces';
 import { displayMovieTitle, sanitizeTitles } from '@mmfv/utils';
-import { MOVIE_IMPORT_BATCH_SIZE } from '@mmfv/constants';
+import {
+    MOVIE_IMPORT_PREVIEW_REQUEST_SIZE,
+    MOVIE_IMPORT_TMDB_CONCURRENCY,
+} from '@mmfv/constants';
 import { SqliteService } from '../database/sqlite.service';
 import { TmdbService } from '../tmdb/tmdb.service';
 import { classifyImportTitle, yearFromReleaseDate } from './import-classify';
@@ -62,36 +65,42 @@ export class MoviesService {
         const batch = titles
             .map(title => (typeof title === 'string' ? title.trim() : ''))
             .filter(title => title.length > 0)
-            .slice(0, MOVIE_IMPORT_BATCH_SIZE);
+            .slice(0, MOVIE_IMPORT_PREVIEW_REQUEST_SIZE);
 
         const items: MovieImportPreviewItem[] = [];
 
-        for (let index = 0; index < batch.length; index++) {
-            const input = batch[index];
-            const search = await this.tmdbService.searchMovies(input);
-            const classified = classifyImportTitle(input, search.results);
-
-            const item: MovieImportPreviewItem = {
-                input,
-                status: classified.status,
-                candidates: search.results.slice(0, 10),
-            };
-
-            if (classified.status === 'auto' && classified.match) {
-                const year = yearFromReleaseDate(classified.match.releaseDate);
-                item.chosenTmdbId = classified.match.id;
-                item.chosenTitle = classified.match.title;
-                item.chosenYear = year;
-
-                if (this.findOneByTmdbId(classified.match.id)) {
-                    item.status = 'exists';
-                }
-            }
-
-            items.push(item);
+        for (const tmdbChunk of chunk(batch, MOVIE_IMPORT_TMDB_CONCURRENCY)) {
+            const chunkItems = await Promise.all(
+                tmdbChunk.map(input => this.resolveImportTitle(input)),
+            );
+            items.push(...chunkItems);
         }
 
         return { items };
+    }
+
+    private async resolveImportTitle(input: string): Promise<MovieImportPreviewItem> {
+        const search = await this.tmdbService.searchMovies(input);
+        const classified = classifyImportTitle(input, search.results);
+
+        const item: MovieImportPreviewItem = {
+            input,
+            status: classified.status,
+            candidates: search.results.slice(0, 10),
+        };
+
+        if (classified.status === 'auto' && classified.match) {
+            const year = yearFromReleaseDate(classified.match.releaseDate);
+            item.chosenTmdbId = classified.match.id;
+            item.chosenTitle = classified.match.title;
+            item.chosenYear = year;
+
+            if (this.findOneByTmdbId(classified.match.id)) {
+                item.status = 'exists';
+            }
+        }
+
+        return item;
     }
 
     async commitImport(body: MovieImportCommitRequest): Promise<MovieImportCommitResponse> {
@@ -215,4 +224,12 @@ export class MoviesService {
             | undefined;
         return row ? this.sqlite.rowToMovie(row) : null;
     }
+}
+
+function chunk<T>(items: T[], size: number): T[][] {
+    const result: T[][] = [];
+    for (let index = 0; index < items.length; index += size) {
+        result.push(items.slice(index, index + size));
+    }
+    return result;
 }

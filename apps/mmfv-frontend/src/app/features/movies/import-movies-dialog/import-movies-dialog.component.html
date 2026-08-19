@@ -51,7 +51,7 @@
     @if (resolveLoading()) {
         <div class="search-status">
             <mat-spinner diameter="24"></mat-spinner>
-            <span>Resolving batch against TMDB…</span>
+            <span>Resolving {{ resolvedCount }} / {{ rows().length }} against TMDB…</span>
         </div>
     }
 

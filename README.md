@@ -91,7 +91,7 @@ The frontend never reads TMDB credentials — all TMDB calls go through the back
 | `GET` | `/api/movies` | List all movies |
 | `POST` | `/api/movies` | Create a movie |
 | `POST` | `/api/movies/from-tmdb` | Import a movie from TMDB by `{ tmdbId }` |
-| `POST` | `/api/movies/import/preview` | Resolve a batch of titles against TMDB (`{ titles }`, max 40) |
+| `POST` | `/api/movies/import/preview` | Resolve a batch of titles against TMDB (`{ titles }`, max 15 per request) |
 | `POST` | `/api/movies/import/commit` | Commit chosen TMDB ids and/or title-only rows |
 | `PUT` | `/api/movies/:id` | Update a movie |
 | `GET` | `/api/tmdb/search/movie?query=` | Search TMDB (proxied, camelCase response) |

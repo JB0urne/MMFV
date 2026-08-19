@@ -7,11 +7,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MoviesService, TmdbService } from '@mmfv/frontend/data-access/movies';
-import { MOVIE_IMPORT_BATCH_SIZE } from '@mmfv/constants';
-import { Movie, MovieImportCommitItem, MovieTmdb } from '@mmfv/interfaces';
+import {
+    MOVIE_IMPORT_BATCH_SIZE,
+    MOVIE_IMPORT_PREVIEW_REQUEST_SIZE,
+} from '@mmfv/constants';
+import { Movie, MovieImportCommitItem, MovieImportPreviewItem, MovieTmdb } from '@mmfv/interfaces';
 import { displayMovieTitle, movieMatchKeys, normalizeMovieTitle } from '@mmfv/utils';
-import { Subject, of } from 'rxjs';
-import { catchError, finalize, takeUntil } from 'rxjs/operators';
+import { EMPTY, Subject, from, of } from 'rxjs';
+import { catchError, concatMap, finalize, map, takeUntil } from 'rxjs/operators';
 
 export type ImportMoviesDialogData = {
     catalog: Movie[];
@@ -59,6 +62,7 @@ export type ImportMovieRow = {
 })
 export class ImportMoviesDialogComponent implements OnDestroy {
     readonly batchSize = MOVIE_IMPORT_BATCH_SIZE;
+    readonly previewRequestSize = MOVIE_IMPORT_PREVIEW_REQUEST_SIZE;
 
     rawText = '';
     readonly rows = signal<ImportMovieRow[]>([]);
@@ -161,45 +165,34 @@ export class ImportMoviesDialogComponent implements OnDestroy {
         const targets = this.rows()
             .filter(r => r.status === 'unresolved')
             .slice(0, this.batchSize);
-        const titles = targets.map(r => r.input);
+        const chunks = chunkArray(targets, this.previewRequestSize);
 
         this.resolveLoading.set(true);
         this.resolveError.set(null);
         this.showOfflineActions.set(false);
 
-        this.moviesService
-            .previewImport(titles)
+        from(chunks)
             .pipe(
-                catchError(error => {
-                    this.resolveError.set(
-                        error?.error?.message ??
-                            'TMDB resolve failed. Abort, or mark remaining as title-only.',
-                    );
-                    this.showOfflineActions.set(true);
-                    return of(null);
-                }),
+                concatMap(chunkTargets =>
+                    this.moviesService.previewImport(chunkTargets.map(r => r.input)).pipe(
+                        map(response => ({ chunkTargets, response })),
+                        catchError(error => {
+                            this.resolveError.set(
+                                error?.error?.message ??
+                                    'TMDB resolve failed. Abort, or mark remaining as title-only.',
+                            );
+                            this.showOfflineActions.set(true);
+                            return EMPTY;
+                        }),
+                    ),
+                ),
                 finalize(() => {
                     this.resolveLoading.set(false);
                 }),
                 takeUntil(this.destroy$),
             )
-            .subscribe(response => {
-                if (!response) {
-                    return;
-                }
-                response.items.forEach((item, index) => {
-                    const row = targets[index];
-                    if (!row) {
-                        return;
-                    }
-                    row.status = item.status;
-                    row.candidates = item.candidates ?? [];
-                    row.chosenTmdbId = item.chosenTmdbId;
-                    row.chosenTitle = item.chosenTitle;
-                    row.chosenYear = item.chosenYear;
-                    row.searchError = null;
-                    this.applyCatalogDedup(row);
-                });
+            .subscribe(({ chunkTargets, response }) => {
+                this.applyPreviewItems(chunkTargets, response.items);
                 this.rows.update(rows => [...rows]);
             });
     }
@@ -414,6 +407,22 @@ export class ImportMoviesDialogComponent implements OnDestroy {
         }
     }
 
+    private applyPreviewItems(targets: ImportMovieRow[], items: MovieImportPreviewItem[]): void {
+        items.forEach((item, index) => {
+            const row = targets[index];
+            if (!row) {
+                return;
+            }
+            row.status = item.status;
+            row.candidates = item.candidates ?? [];
+            row.chosenTmdbId = item.chosenTmdbId;
+            row.chosenTitle = item.chosenTitle;
+            row.chosenYear = item.chosenYear;
+            row.searchError = null;
+            this.applyCatalogDedup(row);
+        });
+    }
+
     private yearFromReleaseDate(releaseDate: string): number {
         const year = releaseDate ? Number.parseInt(releaseDate.slice(0, 4), 10) : 0;
         return Number.isFinite(year) ? year : 0;
@@ -437,4 +446,12 @@ function buildCatalogTitleIndex(catalog: Movie[]): Map<string, Movie> {
         }
     }
     return index;
+}
+
+function chunkArray<T>(items: T[], size: number): T[][] {
+    const result: T[][] = [];
+    for (let index = 0; index < items.length; index += size) {
+        result.push(items.slice(index, index + size));
+    }
+    return result;
 }

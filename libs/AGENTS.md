@@ -17,7 +17,7 @@ Do not add new top-level folders under `libs/` without updating this doc.
 | --- | --- | --- |
 | `frontend/data-access/movies` | `@mmfv/frontend/data-access/movies` | `MoviesService`, `TmdbService` → `/api/movies`, `/api/tmdb` |
 | `shared/interfaces` | `@mmfv/interfaces` | `Movie` (`originalTitle` + `titles[]`), `Language` / `TranslationObject`, `MovieTmdb`, import types — no framework imports; non-buildable (bundled from source) |
-| `shared/constants` | `@mmfv/constants` | Shared numeric/string constants (e.g. `MOVIE_IMPORT_BATCH_SIZE`); non-buildable (bundled from source) |
+| `shared/constants` | `@mmfv/constants` | Shared numeric/string constants; non-buildable (bundled from source) |
 | `shared/utils` | `@mmfv/utils` | Framework-agnostic pure helpers (e.g. movie title display/sanitize); non-buildable (bundled from source) |
 
 ## Rules
