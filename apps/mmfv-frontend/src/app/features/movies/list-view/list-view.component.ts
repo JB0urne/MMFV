@@ -44,6 +44,7 @@ export class ListViewComponent implements OnDestroy {
     @Output() addTmdbMovie = new EventEmitter<number>();
     @Output() editMovie = new EventEmitter<Movie>();
     @Output() deleteMovie = new EventEmitter<Movie>();
+    @Output() importClick = new EventEmitter<void>();
 
     readonly displayTitle = displayMovieTitle;
 
@@ -106,6 +107,10 @@ export class ListViewComponent implements OnDestroy {
 
     onPageChange(event: PageEvent) {
         this.pageChange.emit(event);
+    }
+
+    onImportClick(): void {
+        this.importClick.emit();
     }
 
     onAddTmdbMovie(result: MovieTmdb) {

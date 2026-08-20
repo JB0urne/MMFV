@@ -9,6 +9,15 @@
     --header-total-height: calc(
         var(--header-bar-height) + var(--logo-protrusion-bottom) + var(--logo-protrusion-top)
     );
+
+    /* Brand (aligned with header #003333); overrides azure-blue primary */
+    --brand-primary: #003333;
+    --brand-primary-hover: #002626;
+    --brand-on-primary: #e6eded;
+    --mat-sys-primary: var(--brand-primary);
+    --mat-sys-on-primary: var(--brand-on-primary);
+    --mat-sys-primary-container: #d6e0e0;
+    --mat-sys-on-primary-container: var(--brand-primary);
 }
 
 * {
@@ -68,11 +77,11 @@ body {
     color: #555;
 }
 
-/* Icon buttons (e.g. mat-paginator nav) must not inherit filled “primary” styling */
+/* Plain buttons in cards (Material keeps its own classes) */
 .app-container button:not(.mat-mdc-button-base),
 .card button:not(.mat-mdc-button-base) {
-    background-color: #007acc;
-    color: white;
+    background-color: var(--brand-primary);
+    color: var(--brand-on-primary);
     border: none;
     padding: 12px 24px;
     border-radius: 6px;
@@ -84,7 +93,7 @@ body {
 
 .app-container button:not(.mat-mdc-button-base):hover:not(:disabled),
 .card button:not(.mat-mdc-button-base):hover:not(:disabled) {
-    background-color: #005a9e;
+    background-color: var(--brand-primary-hover);
 }
 
 .app-container button:not(.mat-mdc-button-base):disabled,
@@ -101,8 +110,8 @@ body {
 }
 
 .response {
-    background-color: #f0f9ff;
-    border: 1px solid #007acc;
+    background-color: #eef4f4;
+    border: 1px solid var(--brand-primary);
 }
 
 .error {

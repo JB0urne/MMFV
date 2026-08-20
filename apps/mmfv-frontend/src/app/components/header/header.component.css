@@ -136,6 +136,10 @@
     cursor: pointer;
 }
 
+.nav > ul > li > div.nav-pending {
+    cursor: not-allowed;
+}
+
 .nav > ul > li > div::before {
     content: '';
     position: absolute;

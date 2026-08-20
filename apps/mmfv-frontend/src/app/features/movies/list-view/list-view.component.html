@@ -1,6 +1,12 @@
 <div class="card">
     <h2>Movies</h2>
 
+    <nav class="list-toolbar">
+        <button type="button" class="list-tool">Filter</button>
+        <button type="button" class="list-tool">Search</button>
+        <button type="button" class="list-tool" (click)="onImportClick()">Import</button>
+    </nav>
+
     <section class="search-section">
         <mat-form-field appearance="outline" class="search-field">
             <mat-label>Search TMDB</mat-label>

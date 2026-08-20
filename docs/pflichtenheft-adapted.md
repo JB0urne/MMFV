@@ -16,7 +16,7 @@ In späteren Versionen: reichhaltigere Film-Details und Trailer, eigene Listen, 
 
 ## 2. Produktvision & Einführungstext
 
-*(für die Hilfe- / „?“-Seite, inhaltlich aus dem Original übernommen)*
+*(für die „?“-About-Seite, inhaltlich aus dem Original übernommen; nicht unter ⚙)*
 
 Kein Blog mit langen Reviews, sondern Anregungen, wenn man spontan etwas schauen will. Auf der Startseite eine Filmliste mit den wichtigsten Infos (Darstellung anpassbar). Klick führt zu Details, darunter zu Trailern. Von Film zu Film bzw. Trailer zu Trailer innerhalb der aktuellen **Auswahl**, ohne Umweg über die komplette Liste.
 
@@ -45,6 +45,25 @@ Die Anwendung baut auf drei Ebenen auf (Muss für Major 2):
 3. **L3 – Trailer**: Abspielen; ebenfalls Weiter zur Trailer-Ansicht des nächsten Films der Auswahl.
 
 Optional später: Ebenen konfigurierbar / überspringbar (z. B. nur Bilder, All-in-One).
+
+---
+
+## UX-Architektur & Navigation (Kurz)
+
+**Haupt-Header = Zielstruktur ab V3**, heute größtenteils deaktiviert; Features werden schrittweise verdrahtet.
+
+| Header | Rolle |
+| --- | --- |
+| **Logo** | Start / L1 |
+| **?** | „Worum geht’s?“ / About (eigenständig, **nicht** unter Einstellungen) |
+| **⚙** | Einstellungen (Sprache, Darstellung, Ebenen-Konfig, später Konto-Prefs) |
+| **Listen** | Listen wechseln/verwalten (ab V3) |
+| **Zufall** | Zufallsfilm (nach V3) |
+| **Konto** | Login / Profil (ab V3) |
+
+**Nicht im Haupt-Header:** Filter, Suche, Import — gehören zur **L1-Listenleiste** (bzw. Listen-Verwaltung). Katalogsuche ≠ TMDB-Hinzufügen.
+
+Verdrahtung grob: ⚙/? wachsen in 1.x → L1-Tools in 2.x → Listen/Konto in 3.0 → Zufall danach.
 
 ---
 
@@ -114,7 +133,7 @@ Nicht mehr als aktive Ziele: Kinect/HoloLens, 3D-Filmwolke als Muss, Admin-UI zu
 - TMDB-API über Backend-Proxy (`TMDB_API_KEY` nur serverseitig, `example.env`)
 - SQLite-Schema passend zu `@mmfv/interfaces` (`Movie`: Titel, Übersetzungen, `tmdbId`, Jahr, Timestamps)
 - Bulk-Import: Titelzeilen → Preview (TMDB-Match) → Commit
-- Frontend: paginierte Text-/Tabellenliste, Edit-/Import-Dialoge, Header-Platzhalter (FILTER, IMPORT, SUCHEN, LOGIN)
+- Frontend: paginierte Text-/Tabellenliste, Edit-/Import-Dialoge; Header V3-Form (Listen/Zufall/Konto deaktiviert); L1-Leiste mit Filter/Suche-Stubs + Import
 
 ### Noch offen / nur teilweise
 
@@ -130,7 +149,7 @@ Nicht mehr als aktive Ziele: Kinect/HoloLens, 3D-Filmwolke als Muss, Admin-UI zu
 | L3 Trailer | offen |
 | Data-Folder Sync / Backup ohne Versionskontrolle | offen |
 | Zufallsfilm als Feature | nach 3.0 geplant (`pflichtenheft2`) |
-| Sortieren / Filtern / Katalogsuche in der UI | Header-Stubs, Logik fehlt |
+| Sortieren / Filtern / Katalogsuche in der UI | L1-Stubs; Logik fehlt |
 
 ### Unabhängig vom Versionsfahrplan
 

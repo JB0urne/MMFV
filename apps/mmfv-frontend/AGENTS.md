@@ -18,5 +18,6 @@ This app composes features and app-only UI. Reusable Angular code → `libs/fron
 - Data access: `@mmfv/frontend/data-access/movies` (`MoviesService`, `TmdbService`).
 - HTTP: relative `/api/...` only. Proxy: `proxy.conf.json` → `http://localhost:3000`.
 - TMDB: search/add via backend (`TmdbService`, `addByTmdbId`). **No TMDB tokens or direct TMDB URLs in the frontend.**
-- Bulk import: header **IMPORT** → `ImportMoviesDialogComponent` → `MoviesService.previewImport` / `commitImport` (UI batches of 50, HTTP chunks of 15).
+- Bulk import: list toolbar **Import** → `ImportMoviesDialogComponent` → `MoviesService.previewImport` / `commitImport` (UI batches of 50, HTTP chunks of 15).
+- Header: ⚙, ?, Logo, Listen / Zufall / Konto (pending). Filter/Search on the list view, not in the site header.
 - Catalog list shows DE title when present, else `originalTitle` (`displayMovieTitle` from `@mmfv/utils`).
