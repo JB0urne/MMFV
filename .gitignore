@@ -11,3 +11,6 @@ tmp/
 
 .env
 .cursor/
+
+docs/pflichtenheft.txt
+docs/pflichtenheft2.txt
