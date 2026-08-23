@@ -14,7 +14,7 @@ Do **not** run `npm install` / package changes or start servers (`npm run app`, 
 | --- | --- |
 | `npm run lint` / `nx run-many -t lint` | ESLint across projects with a `lint` target |
 | `npm run test` / `jest` | Jest unit tests (utils + backend `import-classify`) |
-| `nx build frontend` / `nx build mmfv-backend` | Production builds |
+| `nx build mmfv-frontend` / `nx build mmfv-backend` | Production builds |
 
 **CI:** `.github/workflows/ci.yml` runs lint + test on push/PR to `main` (no local git hooks).
 
@@ -48,9 +48,13 @@ Can be found in tsconfig.base.json
 
 | Directory | Nx name |
 | --- | --- |
-| `apps/mmfv-frontend` | `frontend` |
+| `apps/mmfv-frontend` | `mmfv-frontend` |
 | `apps/mmfv-backend` | `mmfv-backend` |
 | `libs/shared/interfaces` | `interfaces` |
 | `libs/shared/constants` | `constants` |
 | `libs/shared/utils` | `utils` |
 | `libs/frontend/data-access/movies` | `frontend-data-access-movies` |
+
+## Nx tags
+
+Projects use `scope:*` and `type:*` tags; ESLint `@nx/enforce-module-boundaries` enforces them.

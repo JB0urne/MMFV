@@ -17,8 +17,46 @@ export default [
                     allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
                     depConstraints: [
                         {
-                            sourceTag: '*',
-                            onlyDependOnLibsWithTags: ['*'],
+                            sourceTag: 'scope:frontend',
+                            onlyDependOnLibsWithTags: ['scope:frontend', 'scope:shared'],
+                        },
+                        {
+                            sourceTag: 'scope:backend',
+                            onlyDependOnLibsWithTags: ['scope:backend', 'scope:shared'],
+                        },
+                        {
+                            sourceTag: 'scope:shared',
+                            onlyDependOnLibsWithTags: ['scope:shared'],
+                        },
+                        {
+                            sourceTag: 'type:app',
+                            onlyDependOnLibsWithTags: [
+                                'type:feature',
+                                'type:data-access',
+                                'type:ui',
+                                'type:util',
+                            ],
+                        },
+                        {
+                            sourceTag: 'type:feature',
+                            onlyDependOnLibsWithTags: [
+                                'type:feature',
+                                'type:ui',
+                                'type:data-access',
+                                'type:util',
+                            ],
+                        },
+                        {
+                            sourceTag: 'type:data-access',
+                            onlyDependOnLibsWithTags: ['type:data-access', 'type:util'],
+                        },
+                        {
+                            sourceTag: 'type:ui',
+                            onlyDependOnLibsWithTags: ['type:ui', 'type:util'],
+                        },
+                        {
+                            sourceTag: 'type:util',
+                            onlyDependOnLibsWithTags: ['type:util'],
                         },
                     ],
                 },
@@ -27,7 +65,6 @@ export default [
     },
     {
         files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts', '**/*.js', '**/*.jsx', '**/*.cjs', '**/*.mjs'],
-        // Override or add rules here
         rules: {},
     },
 ];

@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Monorepo with Angular frontend and NestJS backend",
     "scripts": {
-        "app": "NODE_OPTIONS=--no-deprecation nx run-many -t serve -p mmfv-backend,frontend --parallel",
+        "app": "NODE_OPTIONS=--no-deprecation nx run-many -t serve -p mmfv-backend,mmfv-frontend --parallel",
         "lint": "nx run-many -t lint",
         "test": "jest"
     },

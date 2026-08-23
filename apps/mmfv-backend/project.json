@@ -3,14 +3,14 @@
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "apps/mmfv-backend/src",
     "projectType": "application",
-    "tags": ["backend", "nest"],
+    "tags": ["scope:backend", "type:app"],
     "targets": {
         "build": {
             "executor": "@nx/esbuild:esbuild",
             "outputs": ["{options.outputPath}"],
             "options": {
                 "platform": "node",
-                "outputPath": "dist/apps/mmfv-backend",
+                "outputPath": "dist/mmfv-backend",
                 "outputFileName": "main.js",
                 "format": ["cjs"],
                 "bundle": true,

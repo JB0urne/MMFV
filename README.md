@@ -10,14 +10,14 @@ MMFV (german: "MovieMasterFilmeVerzeichnis", a term created when I was much youn
 
 | Layer | Stack |
 | --- | --- |
-| Monorepo | [Nx](https://nx.dev) 22 |
-| Frontend | Angular 20, Angular Material, RxJS |
-| Backend | NestJS 10, Express |
+| Monorepo | [Nx](https://nx.dev) |
+| Frontend | Angular, Angular Material, RxJS |
+| Backend | NestJS, Express |
 | Database | SQLite via `better-sqlite3` |
 
 ## Prerequisites
 
-- **Node.js** 18+ (20 recommended)
+- **Node.js** 20+ (recommended)
 - **npm**
 - Build tools for native modules (`better-sqlite3` may need Python / C++ toolchain on some systems)
 
@@ -33,52 +33,11 @@ npm run app
 
 | Service | URL | Nx project |
 | --- | --- | --- |
-| Frontend | http://localhost:4200 | `frontend` |
+| Frontend | http://localhost:4200 | `mmfv-frontend` |
 | Backend API | http://localhost:3000/api | `mmfv-backend` |
 
 
-### Run apps separately
-
-```bash
-nx serve mmfv-backend    # API on port 3000
-nx serve frontend        # UI on port 4200
-```
-
-### Build
-
-```bash
-nx build frontend
-nx build mmfv-backend
-```
-
-### Lint & test
-
-```bash
-npm run lint    # ESLint (all projects with a lint target)
-npm run test    # Jest (root jest.config.js)
-```
-
 GitHub Actions (`.github/workflows/ci.yml`) runs lint + test on pushes and PRs to `main`. Run `npm run lint` / `npm run test` locally before pushing if you want early feedback.
-
-## Project structure
-
-```
-.
-├── apps/
-│   ├── mmfv-frontend/          # Angular application (shell, features, app-only dialogs)
-│   └── mmfv-backend/           # NestJS API (movies module, SQLite)
-├── libs/
-│   ├── frontend/               # Shared Angular libraries (data-access, UI)
-│   ├── shared/                 # Cross-cutting TypeScript (interfaces)
-│   └── backend/                # Shared NestJS libraries (placeholder)
-├── seed/
-│   └── movies.json             # Initial movie data when the DB is empty
-├── .cursor/                    # Cursor skills and agent guidance
-├── AGENTS.md                   # Repo-wide guidance for AI agents
-├── package.json                # Root dependencies and scripts
-└── tsconfig.base.json          # Path aliases for `@mmfv/*` imports
-```
-
 
 ## Environment
 

@@ -1,6 +1,6 @@
 # AGENTS.md — mmfv-frontend
 
-Angular UI shell. Nx name: **`frontend`** (directory `apps/mmfv-frontend`). Update when app structure, proxy, or feature layout changes.
+Angular UI shell. Nx name: **`mmfv-frontend`**. Update when app structure, proxy, or feature layout changes.
 
 ## Placement
 

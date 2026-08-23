@@ -24,4 +24,4 @@ Do not add new top-level folders under `libs/` without updating this doc.
 
 - Reusable Angular services/dialogs/components → `libs/frontend/` (skill: `.cursor/skills/angular-component-placement/SKILL.md`).
 - `shared/`: types, constants, and pure functions only; domain folders under `src/lib/<domain>/`; export from `src/index.ts`.
-- New lib: add `@mmfv/...` alias in `tsconfig.base.json`, barrel `src/index.ts`, update this file and root `AGENTS.md`. Never deep-relative imports across projects.
+- New lib: add `@mmfv/...` alias in `tsconfig.base.json`, barrel `src/index.ts`, matching tags, update this file and root `AGENTS.md`. Never deep-relative imports across projects.
