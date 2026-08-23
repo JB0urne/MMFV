@@ -12,5 +12,5 @@ tmp/
 .env
 .cursor/
 
-docs/pflichtenheft.txt
-docs/pflichtenheft2.txt
+docs/*
+!docs/pflichtenheft-adapted.md
