@@ -27,6 +27,9 @@
                 "buildTarget": "mmfv-backend:build"
             },
             "continuous": true
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint"
         }
     }
 }

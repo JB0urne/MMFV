@@ -15,14 +15,15 @@ When dependencies change, **tell the user** what to install or remove and let th
 
 ## Allowed verification
 
-- **Lint:** `nx lint <project>` (e.g. `interfaces`, `frontend-data-access-movies`)
+- **Lint:** `nx lint <project>` or `npm run lint` (e.g. `interfaces`, `frontend-data-access-movies`, `utils`, `mmfv-backend`)
+- **Test:** `npm test` / `jest` (root `jest.config.js`; no per-project Jest targets yet)
 - **Format check:** `npx prettier --check .` (or `--write` only if the user asked to format)
-- **Build (when needed):** `nx build frontend`, `nx build mmfv-backend`, or `npx tsc -p apps/mmfv-backend/tsconfig.json --noEmit`
+- **Build (when needed):** `nx build frontend`, `nx build mmfv-backend`, or `npx tsc -p apps/mmfv-backend/tsconfig.app.json --noEmit`
 - **Typecheck** via build/tsc — not by serving apps
 
 ## Prefer
 
-- Static analysis over runtime checks
+- Static analysis and Jest over starting apps
 - Asking the user to run `npm run app` or manual smoke tests when behavior needs verification in a browser
 
 See also `AGENTS.md` at the repo root.

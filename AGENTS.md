@@ -6,7 +6,17 @@ Nested guides: `apps/mmfv-frontend/AGENTS.md`, `apps/mmfv-backend/AGENTS.md`, `l
 
 ## Agent workflow
 
-Do **not** run `npm install` / package changes or start servers (`npm run app`, `nx serve`, `ng serve`). Verify with lint/build only. Details: `.cursor/rules/agent-dev-workflow.mdc`.
+Do **not** run `npm install` / package changes or start servers (`npm run app`, `nx serve`, `ng serve`). Verify with lint/build/test only. Details: `.cursor/rules/agent-dev-workflow.mdc`.
+
+## Verification
+
+| Command | Purpose |
+| --- | --- |
+| `npm run lint` / `nx run-many -t lint` | ESLint across projects with a `lint` target |
+| `npm run test` / `jest` | Jest unit tests (utils + backend `import-classify`) |
+| `nx build frontend` / `nx build mmfv-backend` | Production builds |
+
+**CI:** `.github/workflows/ci.yml` runs lint + test on push/PR to `main` (no local git hooks).
 
 ## Conventions
 

@@ -21,6 +21,11 @@
         "forceConsistentCasingInFileNames": true,
         "noFallthroughCasesInSwitch": true
     },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist"]
+    "files": [],
+    "include": [],
+    "references": [
+        {
+            "path": "./tsconfig.app.json"
+        }
+    ]
 }

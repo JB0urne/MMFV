@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node10",
+        "types": ["jest", "node"],
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true
+    },
+    "include": ["libs/shared/utils/src/**/*.ts", "apps/mmfv-backend/src/**/*.ts"]
+}

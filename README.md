@@ -51,6 +51,15 @@ nx build frontend
 nx build mmfv-backend
 ```
 
+### Lint & test
+
+```bash
+npm run lint    # ESLint (all projects with a lint target)
+npm run test    # Jest (root jest.config.js)
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs lint + test on pushes and PRs to `main`. Run `npm run lint` / `npm run test` locally before pushing if you want early feedback.
+
 ## Project structure
 
 ```
