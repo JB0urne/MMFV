@@ -1,5 +1,6 @@
 :host {
     display: block;
+    overflow: visible;
 }
 
 .main-header {
@@ -11,11 +12,18 @@
     z-index: 1000;
     overflow: visible;
     max-width: 100%;
+    /* Reserve space so the hanging logo tray stays inside this box (avoids clip) */
     padding-bottom: var(--logo-protrusion-bottom);
+    box-sizing: border-box;
 }
 
 .nav_container {
-    background: #003333;
+    background: linear-gradient(
+        180deg,
+        var(--header-grad-top) 0%,
+        var(--header-grad-mid) 52%,
+        var(--header-grad-bottom) 100%
+    );
     border-bottom: 2px solid black;
     min-width: 960px;
     max-width: 100%;
@@ -25,6 +33,31 @@
     position: relative;
 }
 
+/* Fine programmed grain (CSS only) */
+.nav_container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            transparent 0,
+            transparent 2px,
+            rgba(255, 255, 255, 0.04) 2px,
+            rgba(255, 255, 255, 0.04) 3px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent 0,
+            transparent 2px,
+            rgba(0, 0, 0, 0.08) 2px,
+            rgba(0, 0, 0, 0.08) 3px
+        );
+}
+
 .nav {
     margin-left: auto;
     margin-right: auto;
@@ -32,6 +65,7 @@
     max-width: 100%;
     height: var(--header-bar-height);
     position: relative;
+    z-index: 1;
     overflow: visible;
 }
 
@@ -44,66 +78,117 @@
 #settings,
 #whats_that {
     float: left;
-    padding: 0 18px;
+    padding: 0 12px;
     color: #c0d0d0;
     height: var(--header-bar-height);
     display: flex;
     align-items: center;
     cursor: pointer;
+    position: relative;
+    z-index: 3;
+}
+
+#settings {
+    padding-left: 8px;
 }
 
 #settings:hover,
 #whats_that:hover {
-    text-shadow: 0 0 12px #49f, 0 0 20px #37f, 0 0 50px #25f;
+    text-shadow:
+        0 0 12px #49f,
+        0 0 20px #37f,
+        0 0 50px #25f;
     color: white;
 }
 
-#logo_teil_1,
-#logo_teil_2 {
-    float: left;
-    background: #003333;
-    border: 2px solid black;
-    box-sizing: border-box;
-}
-
-#logo_teil_1 {
-    transform: perspective(100px) rotateX(-25deg);
-    transform-origin: top center;
-    height: calc(
-        var(--header-bar-height) + var(--logo-protrusion-bottom) + var(--logo-protrusion-top)
-    );
-    width: 156px;
-    margin-right: 2px;
-    margin-left: 20px;
-    margin-top: calc(-1 * var(--logo-protrusion-top));
-    margin-bottom: calc(-1 * var(--logo-protrusion-bottom));
-    padding-right: 24px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 0;
-    position: relative;
+.logo-slot {
+    position: absolute;
+    left: 105px;
+    top: 0;
     z-index: 2;
+    width: var(--logo-frame-width);
+    height: var(--logo-frame-height);
+    overflow: visible;
+    pointer-events: none;
 }
 
-#logo_teil_2 {
-    margin-left: 16px;
-    margin-top: 0;
-    height: calc(
-        var(--header-bar-height) + var(--logo-protrusion-bottom) + var(--logo-protrusion-top) - 4px
-    );
-    width: 120px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 0;
-    transform: rotateX(25deg);
-    transform-origin: top center;
+/*
+ * Glow spans the whole bar but is clipped to its height, so no light
+ * reaches the main section below.
+ */
+.logo-glow {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    z-index: 0;
+    width: 100vw;
+    height: var(--header-bar-height);
+    transform: translateX(-50%);
+    overflow: hidden;
+    pointer-events: none;
+    background:
+        radial-gradient(
+            ellipse 24% 90% at 50% 50%,
+            rgba(220, 235, 242, 0.45) 0%,
+            rgba(170, 200, 210, 0.18) 42%,
+            transparent 76%
+        ),
+        linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(200, 225, 235, 0.08) 25%,
+            rgba(210, 230, 240, 0.18) 50%,
+            rgba(200, 225, 235, 0.08) 75%,
+            transparent 100%
+        );
+    filter: blur(10px);
 }
 
-#logo_teil_2 svg {
+.logo-frame {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    z-index: 1;
+    display: block;
+    transform: translateX(-50%);
+    overflow: visible;
+    pointer-events: none;
+}
+
+.logo-outer {
+    fill: #384345;
+    stroke: rgba(0, 0, 0, 0.42);
+    stroke-width: 1;
+    mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+
+.logo-inner {
+    fill: #323c3c;
+    stroke: rgba(0, 0, 0, 0.4);
+    stroke-width: 1;
+}
+
+.logo-icon {
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    z-index: 3;
+    display: block;
+    width: 72px;
+    height: 72px;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.logo-icon img {
+    display: block;
+    width: 72px;
+    height: 72px;
     max-width: 100%;
     max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 9px rgba(210, 232, 240, 0.42));
 }
 
 .nav > ul {
@@ -122,7 +207,7 @@
 .nav > ul > li > div {
     position: relative;
     height: 100%;
-    padding: 0 30px;
+    padding: 0 40px;
     transform: skewX(-20deg);
     border-right: 2px solid black;
     display: flex;
@@ -170,6 +255,8 @@
 }
 
 .nav > ul > li > div:hover > div {
-    text-shadow: 0 0 20px #37f, 0 0 50px #25f;
+    text-shadow:
+        0 0 20px #37f,
+        0 0 50px #25f;
     color: white;
 }

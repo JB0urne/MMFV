@@ -3,14 +3,15 @@
 
 /* Global Styles */
 :root {
-    --header-bar-height: 55px;
-    --logo-protrusion-bottom: 34px;
-    --logo-protrusion-top: 11px;
-    --header-total-height: calc(
-        var(--header-bar-height) + var(--logo-protrusion-bottom) + var(--logo-protrusion-top)
-    );
+    --header-bar-height: 64px;
+    /* SVG frame is 190x90; outer hangs to y=70, inner to y=85 */
+    --logo-protrusion-bottom: 25px;
+    --logo-protrusion-top: 0px;
+    --logo-frame-width: 190px;
+    --logo-frame-height: 90px;
+    --header-total-height: calc(var(--header-bar-height) + var(--logo-protrusion-bottom) + var(--logo-protrusion-top));
 
-    /* Brand (aligned with header #003333); overrides azure-blue primary */
+    /* Brand teal (controls); header chrome is separate charcoal-teal */
     --brand-primary: #003333;
     --brand-primary-hover: #002626;
     --brand-on-primary: #e6eded;
@@ -18,6 +19,13 @@
     --mat-sys-on-primary: var(--brand-on-primary);
     --mat-sys-primary-container: #d6e0e0;
     --mat-sys-on-primary-container: var(--brand-primary);
+
+    /* Header = muted charcoal-teal chrome; stage = cooler black + teal mist */
+    --header-grad-top: #1c2a2a;
+    --header-grad-mid: #152020;
+    --header-grad-bottom: #0e1616;
+    --stage-base: #050a0c;
+    --stage-deep: #030608;
 }
 
 * {
@@ -25,7 +33,7 @@
 }
 
 html {
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 html,
@@ -33,14 +41,65 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
-    overflow-x: hidden;
+    background-color: var(--stage-base);
+    overflow-x: clip;
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    position: relative;
+}
+
+/* Programmed smoke / mist layer (no image assets) */
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::before {
+    background:
+        radial-gradient(ellipse 85% 55% at 12% 28%, rgba(42, 90, 92, 0.3) 0%, transparent 58%),
+        radial-gradient(ellipse 70% 65% at 88% 62%, rgba(30, 70, 78, 0.26) 0%, transparent 52%),
+        radial-gradient(ellipse 95% 45% at 48% -5%, rgba(48, 100, 104, 0.2) 0%, transparent 48%),
+        radial-gradient(ellipse 60% 40% at 55% 85%, rgba(24, 52, 56, 0.32) 0%, transparent 55%),
+        linear-gradient(180deg, #0a1214 0%, var(--stage-deep) 100%);
+    animation: stage-smoke-a 32s ease-in-out infinite alternate;
+}
+
+body::after {
+    background:
+        radial-gradient(ellipse 50% 35% at 35% 55%, rgba(42, 90, 92, 0.14) 0%, transparent 60%),
+        radial-gradient(ellipse 45% 30% at 70% 25%, rgba(30, 70, 78, 0.16) 0%, transparent 55%);
+    opacity: 0.85;
+    animation: stage-smoke-b 24s ease-in-out infinite alternate;
+}
+
+@keyframes stage-smoke-a {
+    from {
+        transform: scale(1) translate(0, 0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(1.06) translate(-1.5%, 1%);
+        opacity: 0.88;
+    }
+}
+
+@keyframes stage-smoke-b {
+    from {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.75;
+    }
+    to {
+        transform: translate(2%, -1.5%) scale(1.08);
+        opacity: 1;
+    }
 }
 
 /* App container and content boxes (global so child components get card styling) */
@@ -62,7 +121,7 @@ body {
     border-radius: 8px;
     padding: 24px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 28px rgba(0, 0, 0, 0.4);
     border: 1px solid #e0e0e0;
 }
 
@@ -148,4 +207,3 @@ body {
     padding: 40px;
     color: #666;
 }
-
