@@ -4,13 +4,13 @@ Angular UI shell. Nx name: **`mmfv-frontend`**. Update when app structure, proxy
 
 ## Placement
 
-This app composes features and app-only UI. Reusable Angular code → `libs/frontend/` (skill: `.cursor/skills/angular-component-placement/SKILL.md`).
+All Angular **components** live in this app. Shared injectable Angular code (services, stores, facades) → `libs/frontend/`.
 
 | Location | Use for |
 | --- | --- |
-| `libs/frontend/` | Reusable services, dialogs, UI |
-| `app/features/` | App-specific feature views |
-| `app/components/` | Layout chrome |
+| `app/features/` | Feature views, dialogs, view-mode presenters (table / list / grid) |
+| `app/components/` | Layout chrome (header, shell) |
+| `libs/frontend/` | Services, stores, facades, HTTP clients — **not** components |
 
 ## Patterns
 

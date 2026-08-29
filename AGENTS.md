@@ -23,7 +23,8 @@ Do **not** run `npm install` / package changes or start servers (`npm run app`, 
 - Shared types → `libs/shared/interfaces` (`@mmfv/interfaces`).
 - Shared constants → `libs/shared/constants` (`@mmfv/constants`).
 - Shared pure helpers → `libs/shared/utils` (`@mmfv/utils`).
-- Reusable Angular code → `libs/frontend/` (see `.cursor/skills/angular-component-placement/SKILL.md`).
+- Angular components → `apps/mmfv-frontend/src/app/` (`features/`, `components/`)
+- Angular services, stores, facades → `libs/frontend/` (not components).
 - New Angular components: separate `.ts` / `.html` / `.css`; standalone preferred.
 - API prefix `/api`; frontend calls `/api/...` (dev proxy → backend).
 - Do not commit `.env`, `node_modules/`, `dist/`, `.nx/`, `/data/`.

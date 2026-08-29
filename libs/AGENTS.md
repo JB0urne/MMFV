@@ -6,7 +6,7 @@ Shared code via `@mmfv/*` aliases in `tsconfig.base.json`. Update this file when
 
 ```
 libs/
-├── frontend/   # Angular shared (data-access, UI)
+├── frontend/   # Angular shared (data-access, services, stores — not components)
 ├── shared/     # Framework-agnostic types and constants
 └── backend/    # NestJS shared (placeholder)
 ```
@@ -22,6 +22,6 @@ Do not add new top-level folders under `libs/` without updating this doc.
 
 ## Rules
 
-- Reusable Angular services/dialogs/components → `libs/frontend/` (skill: `.cursor/skills/angular-component-placement/SKILL.md`).
+- Reusable Angular services, stores, facades → `libs/frontend/`. Angular **components** belong in `apps/mmfv-frontend/src/app/`
 - `shared/`: types, constants, and pure functions only; domain folders under `src/lib/<domain>/`; export from `src/index.ts`.
 - New lib: add `@mmfv/...` alias in `tsconfig.base.json`, barrel `src/index.ts`, matching tags, update this file and root `AGENTS.md`. Never deep-relative imports across projects.
