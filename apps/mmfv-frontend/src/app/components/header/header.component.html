@@ -1,44 +1,50 @@
 <header class="main-header">
     <div class="nav_container">
         <div class="nav">
-            <div id="settings">
-                <span>⚙</span>
+            <div class="nav-left">
+                <div id="settings">
+                    <span>⚙</span>
+                </div>
+                <div id="whats_that">
+                    <span>?</span>
+                </div>
             </div>
-            <div id="whats_that">
-                <span>?</span>
+            <div class="nav-center">
+                <div class="logo-slot">
+                    <div class="logo-glow" aria-hidden="true"></div>
+                    <svg class="logo-frame" width="190" height="90" viewBox="0 0 190 90" aria-hidden="true">
+                        <path class="logo-outer" d="M0 0 H190 L165 70 H25 Z" />
+                        <path class="logo-inner" d="M25 0 H165 L155 85 H35 Z" />
+                    </svg>
+                    <a routerLink="/" class="logo-icon" aria-label="Home">
+                        <img
+                            src="assets/logo_with_transparency_grey.png"
+                            alt="MMFV"
+                            width="54"
+                            height="54"
+                        />
+                    </a>
+                </div>
             </div>
-            <div class="logo-slot">
-                <div class="logo-glow" aria-hidden="true"></div>
-                <svg class="logo-frame" width="190" height="90" viewBox="0 0 190 90" aria-hidden="true">
-                    <path class="logo-outer" d="M0 0 H190 L165 70 H25 Z" />
-                    <path class="logo-inner" d="M25 0 H165 L155 85 H35 Z" />
-                </svg>
-                <a routerLink="/" class="logo-icon" aria-label="Home">
-                    <img
-                        src="assets/logo_with_transparency_grey.png"
-                        alt="MMFV"
-                        width="54"
-                        height="54"
-                    />
-                </a>
+            <div class="nav-right">
+                <ul>
+                    <li>
+                        <div class="nav-pending">
+                            <div>LISTEN</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="nav-pending">
+                            <div>ZUFALL</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="nav-pending">
+                            <div>KONTO</div>
+                        </div>
+                    </li>
+                </ul>
             </div>
-            <ul>
-                <li>
-                    <div class="nav-pending">
-                        <div>LISTEN</div>
-                    </div>
-                </li>
-                <li>
-                    <div class="nav-pending">
-                        <div>ZUFALL</div>
-                    </div>
-                </li>
-                <li>
-                    <div class="nav-pending">
-                        <div>KONTO</div>
-                    </div>
-                </li>
-            </ul>
         </div>
     </div>
 </header>

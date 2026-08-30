@@ -25,8 +25,7 @@
         var(--header-grad-bottom) 100%
     );
     border-bottom: 2px solid black;
-    min-width: 960px;
-    max-width: 100%;
+    width: 100%;
     font-size: 32px;
     height: var(--header-bar-height);
     overflow: visible;
@@ -59,25 +58,36 @@
 }
 
 .nav {
-    margin-left: auto;
-    margin-right: auto;
-    width: 960px;
-    max-width: 100%;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: var(--header-max-width);
+    margin-inline: auto;
+    padding-inline: 12px;
     height: var(--header-bar-height);
     position: relative;
     z-index: 1;
     overflow: visible;
+    box-sizing: border-box;
 }
 
-.nav::after {
-    content: '';
-    display: table;
-    clear: both;
+.nav-left,
+.nav-right {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    height: var(--header-bar-height);
+}
+
+.nav-center {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--header-bar-height);
+    position: relative;
 }
 
 #settings,
 #whats_that {
-    float: left;
     padding: 0 12px;
     color: #c0d0d0;
     height: var(--header-bar-height);
@@ -103,11 +113,12 @@
 
 .logo-slot {
     position: absolute;
-    left: 105px;
+    left: calc(100% / 3);
     top: 0;
     z-index: 2;
     width: var(--logo-frame-width);
     height: var(--logo-frame-height);
+    transform: translateX(-50%);
     overflow: visible;
     pointer-events: none;
 }
@@ -191,20 +202,19 @@
     filter: drop-shadow(0 0 9px rgba(210, 232, 240, 0.42));
 }
 
-.nav > ul {
+.nav-right > ul {
     list-style: none;
     margin: 0;
     padding: 0;
-    float: right;
+    display: flex;
     height: var(--header-bar-height);
 }
 
-.nav > ul > li {
-    float: left;
+.nav-right > ul > li {
     height: var(--header-bar-height);
 }
 
-.nav > ul > li > div {
+.nav-right > ul > li > div {
     position: relative;
     height: 100%;
     padding: 0 40px;
@@ -217,15 +227,15 @@
     box-sizing: border-box;
 }
 
-.nav > ul > li > div.nav-action {
+.nav-right > ul > li > div.nav-action {
     cursor: pointer;
 }
 
-.nav > ul > li > div.nav-pending {
+.nav-right > ul > li > div.nav-pending {
     cursor: not-allowed;
 }
 
-.nav > ul > li > div::before {
+.nav-right > ul > li > div::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -242,19 +252,20 @@
     transition: opacity 0.15s ease;
 }
 
-.nav > ul > li > div:hover::before {
+.nav-right > ul > li > div:hover::before {
     opacity: 1;
 }
 
-.nav > ul > li > div > div {
+.nav-right > ul > li > div > div {
     position: relative;
     z-index: 1;
     transform: skewX(20deg);
     font-size: 0.8em;
     color: #c0d0d0;
+    white-space: nowrap;
 }
 
-.nav > ul > li > div:hover > div {
+.nav-right > ul > li > div:hover > div {
     text-shadow:
         0 0 20px #37f,
         0 0 50px #25f;
