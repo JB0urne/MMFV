@@ -1,0 +1,78 @@
+<div class="card">
+    <h2>Movies</h2>
+
+    <nav class="list-toolbar">
+        <button type="button" class="list-tool">Filter</button>
+        <button type="button" class="list-tool">Search</button>
+        <button type="button" class="list-tool" (click)="onImportMovies()">Import</button>
+        <span class="toolbar-spacer"></span>
+        <div class="view-toggle" role="group" aria-label="Catalog view mode">
+            <button
+                type="button"
+                class="list-tool view-tool"
+                [class.view-tool-active]="catalog.viewMode() === 'table'"
+                (click)="onViewModeChange('table')"
+            >
+                Table
+            </button>
+            <button
+                type="button"
+                class="list-tool view-tool"
+                [class.view-tool-active]="catalog.viewMode() === 'list'"
+                (click)="onViewModeChange('list')"
+            >
+                List
+            </button>
+            <button
+                type="button"
+                class="list-tool view-tool"
+                [class.view-tool-active]="catalog.viewMode() === 'grid'"
+                (click)="onViewModeChange('grid')"
+            >
+                Grid
+            </button>
+        </div>
+    </nav>
+
+    <app-tmdb-search-panel></app-tmdb-search-panel>
+
+    @if (catalog.totalMovies() > 0) {
+        @switch (catalog.viewMode()) {
+            @case ('list') {
+                <app-movie-list-view
+                    [movies]="catalog.paginatedMovies()"
+                    (editMovie)="onEditMovie($event)"
+                    (deleteMovie)="onDeleteMovie($event)"
+                ></app-movie-list-view>
+            }
+            @case ('grid') {
+                <app-movie-grid-view
+                    [movies]="catalog.paginatedMovies()"
+                    (editMovie)="onEditMovie($event)"
+                    (deleteMovie)="onDeleteMovie($event)"
+                ></app-movie-grid-view>
+            }
+            @default {
+                <app-movie-table-view
+                    [movies]="catalog.paginatedMovies()"
+                    [displayedColumns]="displayedColumns"
+                    (editMovie)="onEditMovie($event)"
+                    (deleteMovie)="onDeleteMovie($event)"
+                ></app-movie-table-view>
+            }
+        }
+        <mat-paginator
+            [length]="catalog.totalMovies()"
+            [pageSize]="catalog.pageSize()"
+            [pageIndex]="catalog.pageIndex()"
+            [pageSizeOptions]="catalog.pageSizeOptions"
+            [showFirstLastButtons]="true"
+            (page)="onPageChange($event)"
+        >
+        </mat-paginator>
+    } @else {
+        <div class="empty-state">
+            <p>No movies found.</p>
+        </div>
+    }
+</div>

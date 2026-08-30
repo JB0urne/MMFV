@@ -1,0 +1,36 @@
+<ul class="movie-list">
+    @for (movie of movies; track movie.id) {
+        <li class="movie-list-item">
+            <div class="poster-placeholder" aria-hidden="true"></div>
+            <div class="movie-list-content">
+                <div class="movie-list-main">
+                    <strong class="movie-title">{{ displayTitle(movie) }}</strong>
+                    <span class="movie-meta">TMDB ID: {{ movie.tmdbId ?? '—' }}</span>
+                    <span class="movie-meta">Year: {{ movie.year ?? '—' }}</span>
+                </div>
+                <div class="actions">
+                    <button
+                        mat-icon-button
+                        color="primary"
+                        type="button"
+                        matTooltip="Edit"
+                        aria-label="Edit movie"
+                        (click)="onEditMovie(movie)"
+                    >
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                        mat-icon-button
+                        color="warn"
+                        type="button"
+                        matTooltip="Delete"
+                        aria-label="Delete movie"
+                        (click)="onDeleteMovie(movie)"
+                    >
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </li>
+    }
+</ul>

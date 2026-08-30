@@ -2,17 +2,6 @@
 
 <div class="container">
     <main>
-        <app-list-view
-            [paginatedMovies$]="paginatedMovies$"
-            [totalMovies$]="totalMovies$"
-            [pageSize$]="pageSize$"
-            [pageIndex$]="pageIndex$"
-            [displayedColumns]="displayedColumns"
-            (pageChange)="onPageChange($event)"
-            (addTmdbMovie)="onAddTmdbMovie($event)"
-            (editMovie)="onEditMovie($event)"
-            (deleteMovie)="onDeleteMovie($event)"
-            (importClick)="onImportMovies()"
-        ></app-list-view>
+        <app-movies-catalog></app-movies-catalog>
     </main>
 </div>
