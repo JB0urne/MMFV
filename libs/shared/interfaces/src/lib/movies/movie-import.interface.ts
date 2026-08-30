@@ -21,7 +21,13 @@ export interface MovieImportPreviewResponse {
 }
 
 export type MovieImportCommitItem =
-    | { type: 'tmdb'; tmdbId: number }
+    | {
+          type: 'tmdb';
+          tmdbId: number;
+          originalTitle: string;
+          localizedTitle: string;
+          year?: number;
+      }
     | { type: 'title'; title: string };
 
 export interface MovieImportCommitRequest {

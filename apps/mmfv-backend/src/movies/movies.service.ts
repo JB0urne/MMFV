@@ -6,8 +6,9 @@ import type {
     MovieImportCommitResponse,
     MovieImportPreviewItem,
     MovieImportPreviewResponse,
+    MovieTmdb,
 } from '@mmfv/interfaces';
-import { displayMovieTitle, sanitizeTitles } from '@mmfv/utils';
+import { displayMovieTitle, movieFromTmdbSearchHit, sanitizeTitles } from '@mmfv/utils';
 import {
     MOVIE_IMPORT_PREVIEW_REQUEST_SIZE,
     MOVIE_IMPORT_TMDB_CONCURRENCY,
@@ -86,7 +87,10 @@ export class MoviesService {
         const item: MovieImportPreviewItem = {
             input,
             status: classified.status,
-            candidates: search.results.slice(0, 10),
+            candidates: previewCandidates(
+                search.results,
+                classified.status === 'auto' ? classified.match : undefined,
+            ),
         };
 
         if (classified.status === 'auto' && classified.match) {
@@ -120,12 +124,37 @@ export class MoviesService {
                 if (!Number.isFinite(item.tmdbId)) {
                     throw new BadRequestException('tmdb items require a numeric tmdbId');
                 }
+                const originalTitle =
+                    typeof item.originalTitle === 'string' ? item.originalTitle.trim() : '';
+                if (!originalTitle) {
+                    throw new BadRequestException('tmdb items require a non-empty originalTitle');
+                }
+                const localizedTitle =
+                    typeof item.localizedTitle === 'string' ? item.localizedTitle.trim() : '';
+                const year =
+                    typeof item.year === 'number' && Number.isFinite(item.year) ? item.year : 0;
+
                 const existing = this.findOneByTmdbId(item.tmdbId);
                 if (existing) {
                     skipped += 1;
                     continue;
                 }
-                added.push(await this.addByTmdbId(item.tmdbId));
+
+                const mapped = movieFromTmdbSearchHit({
+                    id: item.tmdbId,
+                    title: localizedTitle,
+                    originalTitle,
+                    releaseDate: year > 0 ? `${year}-01-01` : '',
+                });
+                added.push(
+                    this.add({
+                        id: '',
+                        originalTitle: mapped.originalTitle,
+                        titles: mapped.titles,
+                        tmdbId: mapped.tmdbId,
+                        year: mapped.year,
+                    }),
+                );
                 continue;
             }
 
@@ -232,4 +261,13 @@ function chunk<T>(items: T[], size: number): T[][] {
         result.push(items.slice(index, index + size));
     }
     return result;
+}
+
+/** Top search hits for the UI, always including an auto-match when it falls outside the slice. */
+function previewCandidates(results: MovieTmdb[], autoMatch?: MovieTmdb): MovieTmdb[] {
+    const top = results.slice(0, 10);
+    if (!autoMatch || top.some(hit => hit.id === autoMatch.id)) {
+        return top;
+    }
+    return [autoMatch, ...top.filter(hit => hit.id !== autoMatch.id)].slice(0, 10);
 }

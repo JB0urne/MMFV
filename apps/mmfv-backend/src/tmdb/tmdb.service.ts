@@ -2,7 +2,7 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TMDB_SEARCH_LANGUAGE } from '@mmfv/constants';
 import type { Movie, MovieTmdb, MovieTmdbSearchResponse } from '@mmfv/interfaces';
-import { titlesFromLocalized } from '@mmfv/utils';
+import { movieFromTmdbSearchHit } from '@mmfv/utils';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -116,13 +116,13 @@ function mapMovieTmdb(raw: TmdbSearchMovieRaw): MovieTmdb {
 
 /** TMDB `/movie/{id}` details → app `Movie` (local `id` assigned on insert). */
 function mapTmdbDetailsToMovie(raw: TmdbMovieDetailsRaw): Movie {
-    const year = raw.release_date ? Number.parseInt(raw.release_date.slice(0, 4), 10) : 0;
-    const originalTitle = (raw.original_title || raw.title || '').trim();
     return {
         id: '',
-        originalTitle,
-        titles: titlesFromLocalized(originalTitle, raw.title ?? ''),
-        tmdbId: raw.id,
-        year: Number.isFinite(year) ? year : 0,
+        ...movieFromTmdbSearchHit({
+            id: raw.id,
+            title: raw.title,
+            originalTitle: raw.original_title,
+            releaseDate: raw.release_date,
+        }),
     };
 }

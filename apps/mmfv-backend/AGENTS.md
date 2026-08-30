@@ -10,7 +10,7 @@ NestJS + SQLite API. Nx name: **`mmfv-backend`**. Global prefix `/api`. Update w
 | `POST` | `/api/movies` | `Movie` body (`id` assigned server-side) |
 | `POST` | `/api/movies/from-tmdb` | `{ tmdbId: number }` |
 | `POST` | `/api/movies/import/preview` | `{ titles: string[] }` (max 15) → classify TMDB matches (5 parallel TMDB calls per request) |
-| `POST` | `/api/movies/import/commit` | `{ items: ({ type:'tmdb', tmdbId } \| { type:'title', title })[] }` |
+| `POST` | `/api/movies/import/commit` | `{ items: ({ type:'tmdb', tmdbId, originalTitle, localizedTitle, year? } \| { type:'title', title })[] }` — no TMDB re-fetch on commit |
 | `PUT` | `/api/movies/:id` | `Movie` body |
 | `DELETE` | `/api/movies/:id` | `204` on success |
 | `GET` | `/api/tmdb/search/movie` | `?query=&page=` → `MovieTmdbSearchResponse` |

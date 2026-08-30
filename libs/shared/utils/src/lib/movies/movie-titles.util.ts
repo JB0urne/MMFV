@@ -1,4 +1,4 @@
-import type { Language, Movie, TranslationObject } from '@mmfv/interfaces';
+import type { Language, Movie, MovieTmdb, TranslationObject } from '@mmfv/interfaces';
 import { isLanguage } from '@mmfv/interfaces';
 
 export function normalizeMovieTitle(value: string): string {
@@ -45,6 +45,20 @@ export function titlesFromLocalized(
         return [];
     }
     return [{ language, value: localized }];
+}
+
+/** TMDB search hit (or equivalent fields) → catalog movie fields (no local `id`). */
+export function movieFromTmdbSearchHit(
+    hit: Pick<MovieTmdb, 'id' | 'title' | 'originalTitle' | 'releaseDate'>,
+): Pick<Movie, 'originalTitle' | 'titles' | 'tmdbId' | 'year'> {
+    const year = hit.releaseDate ? Number.parseInt(hit.releaseDate.slice(0, 4), 10) : 0;
+    const originalTitle = (hit.originalTitle || hit.title || '').trim();
+    return {
+        originalTitle,
+        titles: titlesFromLocalized(originalTitle, hit.title ?? ''),
+        tmdbId: hit.id,
+        year: Number.isFinite(year) ? year : 0,
+    };
 }
 
 /** Normalized keys for catalog / import dedup (original + all translations). */

@@ -1,6 +1,7 @@
 import type { Movie, TranslationObject } from '@mmfv/interfaces';
 import {
     displayMovieTitle,
+    movieFromTmdbSearchHit,
     movieMatchKeys,
     normalizeMovieTitle,
     sanitizeTitles,
@@ -80,6 +81,40 @@ describe('titlesFromLocalized', () => {
         expect(titlesFromLocalized('Inception', 'Anfang')).toEqual([
             { language: 'DE', value: 'Anfang' },
         ]);
+    });
+});
+
+describe('movieFromTmdbSearchHit', () => {
+    it('maps original, localized DE title, year, and tmdb id', () => {
+        expect(
+            movieFromTmdbSearchHit({
+                id: 27205,
+                title: 'Anfang',
+                originalTitle: 'Inception',
+                releaseDate: '2010-07-16',
+            }),
+        ).toEqual({
+            originalTitle: 'Inception',
+            titles: [{ language: 'DE', value: 'Anfang' }],
+            tmdbId: 27205,
+            year: 2010,
+        });
+    });
+
+    it('returns empty titles when localized equals original', () => {
+        expect(
+            movieFromTmdbSearchHit({
+                id: 603,
+                title: 'The Matrix',
+                originalTitle: 'The Matrix',
+                releaseDate: '1999-03-31',
+            }),
+        ).toEqual({
+            originalTitle: 'The Matrix',
+            titles: [],
+            tmdbId: 603,
+            year: 1999,
+        });
     });
 });
 

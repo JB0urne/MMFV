@@ -40,6 +40,8 @@ export type ImportMovieRow = {
     chosenTitle?: string;
     chosenYear?: number;
     chosenTmdbId?: number;
+    /** Full TMDB search hit for the chosen match (used on commit without re-fetch). */
+    chosenCandidate?: MovieTmdb;
     searchOpen: boolean;
     searchLoading: boolean;
     searchError: string | null;
@@ -241,6 +243,7 @@ export class ImportMoviesDialogComponent implements OnDestroy {
         row.chosenTitle = result.title.trim();
         row.chosenYear = this.yearFromReleaseDate(result.releaseDate);
         row.chosenTmdbId = result.id;
+        row.chosenCandidate = result;
         row.status = this.catalogTmdbIds.has(result.id) ? 'exists' : 'manual';
         row.searchOpen = false;
         row.searchError = null;
@@ -250,6 +253,7 @@ export class ImportMoviesDialogComponent implements OnDestroy {
         row.chosenTitle = undefined;
         row.chosenYear = undefined;
         row.chosenTmdbId = undefined;
+        row.chosenCandidate = undefined;
         row.status = 'title-only';
         row.searchOpen = false;
         row.searchError = null;
@@ -259,6 +263,7 @@ export class ImportMoviesDialogComponent implements OnDestroy {
         row.chosenTitle = undefined;
         row.chosenYear = undefined;
         row.chosenTmdbId = undefined;
+        row.chosenCandidate = undefined;
         row.status = 'skipped';
         row.searchOpen = false;
         row.searchError = null;
@@ -268,6 +273,7 @@ export class ImportMoviesDialogComponent implements OnDestroy {
         row.chosenTitle = undefined;
         row.chosenYear = undefined;
         row.chosenTmdbId = undefined;
+        row.chosenCandidate = undefined;
         if (row.candidates.length > 0) {
             row.status = 'ambiguous';
         } else {
@@ -345,7 +351,20 @@ export class ImportMoviesDialogComponent implements OnDestroy {
                 continue;
             }
             if (row.chosenTmdbId != null && (row.status === 'auto' || row.status === 'manual')) {
-                items.push({ type: 'tmdb', tmdbId: row.chosenTmdbId });
+                const candidate = this.chosenCandidate(row);
+                if (!candidate) {
+                    this.commitError.set(
+                        `Row ${row.lineNumber}: missing TMDB data for the chosen match. Resolve again or pick another title.`,
+                    );
+                    return;
+                }
+                items.push({
+                    type: 'tmdb',
+                    tmdbId: row.chosenTmdbId,
+                    originalTitle: candidate.originalTitle,
+                    localizedTitle: candidate.title,
+                    year: row.chosenYear ?? this.yearFromReleaseDate(candidate.releaseDate),
+                });
                 continue;
             }
             if (row.status === 'title-only') {
@@ -407,6 +426,16 @@ export class ImportMoviesDialogComponent implements OnDestroy {
         }
     }
 
+    private chosenCandidate(row: ImportMovieRow): MovieTmdb | undefined {
+        if (row.chosenCandidate) {
+            return row.chosenCandidate;
+        }
+        if (row.chosenTmdbId == null) {
+            return undefined;
+        }
+        return row.candidates.find(candidate => candidate.id === row.chosenTmdbId);
+    }
+
     private applyPreviewItems(targets: ImportMovieRow[], items: MovieImportPreviewItem[]): void {
         items.forEach((item, index) => {
             const row = targets[index];
@@ -418,6 +447,11 @@ export class ImportMoviesDialogComponent implements OnDestroy {
             row.chosenTmdbId = item.chosenTmdbId;
             row.chosenTitle = item.chosenTitle;
             row.chosenYear = item.chosenYear;
+            row.chosenCandidate =
+                item.chosenTmdbId != null
+                    ? (item.candidates.find(candidate => candidate.id === item.chosenTmdbId) ??
+                      undefined)
+                    : undefined;
             row.searchError = null;
             this.applyCatalogDedup(row);
         });
