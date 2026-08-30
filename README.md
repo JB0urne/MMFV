@@ -47,7 +47,6 @@ Copy `example.env` to `.env` in the repo root and set every value; **all listed 
 | --- | --- |
 | `BACKEND_PORT` | Backend HTTP listen port |
 | `SQLITE_PATH` | SQLite database file path |
-| `SQLITE_SEED_FILE` | Seed JSON path (used when the DB is empty) |
 | `TMDB_API_KEY` | TMDB API Read Access Token (Bearer token) |
 
 The frontend never reads TMDB credentials — all TMDB calls go through the backend.

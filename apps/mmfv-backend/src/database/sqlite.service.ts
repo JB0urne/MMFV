@@ -1,9 +1,9 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { Movie, StrictMovie, TranslationObject } from '@mmfv/interfaces';
+import type { Movie, TranslationObject } from '@mmfv/interfaces';
 import { sanitizeTitles } from '@mmfv/utils';
 import Database from 'better-sqlite3';
-import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { mkdirSync } from 'fs';
 import { dirname } from 'path';
 
 type MovieRow = {
@@ -42,41 +42,10 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
                 updated_at TEXT
             )
         `);
-        this.seedFromDumpIfEmpty();
     }
 
     onModuleDestroy(): void {
         this.db?.close();
-    }
-
-    private seedFromDumpIfEmpty(): void {
-        const count = this.db.prepare('SELECT COUNT(*) AS c FROM movies').get() as { c: number };
-        if (count.c > 0) {
-            return;
-        }
-        const seedPath = this.requireEnv('SQLITE_SEED_FILE');
-        if (!existsSync(seedPath)) {
-            throw new Error(`SQLITE_SEED_FILE does not exist: ${seedPath}`);
-        }
-        const raw = JSON.parse(readFileSync(seedPath, 'utf-8')) as StrictMovie[];
-        const insert = this.db.prepare(
-            `INSERT INTO movies (id, original_title, titles, tmdb_id, year, created_at, updated_at)
-             VALUES (@id, @original_title, @titles, @tmdb_id, @year, @created_at, @updated_at)`,
-        );
-        const tx = this.db.transaction((rows: StrictMovie[]) => {
-            for (const r of rows) {
-                insert.run({
-                    id: r.id,
-                    original_title: r.originalTitle,
-                    titles: JSON.stringify(sanitizeTitles(r.titles ?? [])),
-                    tmdb_id: r.tmdbId ?? null,
-                    year: r.year ?? null,
-                    created_at: r.createdAt ?? null,
-                    updated_at: r.updatedAt ?? null,
-                });
-            }
-        });
-        tx(raw);
     }
 
     private requireEnv(key: string): string {

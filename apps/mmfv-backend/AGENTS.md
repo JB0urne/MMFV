@@ -19,7 +19,7 @@ NestJS + SQLite API. Nx name: **`mmfv-backend`**. Global prefix `/api`. Update w
 
 ## Env (all required)
 
-`BACKEND_PORT`, `SQLITE_PATH`, `SQLITE_SEED_FILE`, `TMDB_API_KEY` — see `example.env`. No code fallbacks.
+`BACKEND_PORT`, `SQLITE_PATH`, `TMDB_API_KEY` — see `example.env`. No code fallbacks.
 
 ## Conventions
 
