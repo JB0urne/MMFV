@@ -1,0 +1,16 @@
+{
+    "name": "frontend-services-movies",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/frontend/services/movies/src",
+    "projectType": "library",
+    "tags": ["scope:frontend", "type:feature"],
+    "targets": {
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": ["{options.outputFile}"],
+            "options": {
+                "lintFilePatterns": ["libs/frontend/services/movies/**/*.ts"]
+            }
+        }
+    }
+}

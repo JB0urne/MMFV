@@ -37,8 +37,9 @@ Can be found in tsconfig.base.json
 
 | Task | Start here |
 | --- | --- |
-| Movie list / edit UI | `apps/mmfv-frontend/src/app/` |
+| Movies UI | `apps/mmfv-frontend/src/app/features/movies/` |
 | HTTP clients | `libs/frontend/data-access/movies` |
+| Catalog state | `libs/frontend/services/movies` |
 | Movie types | `libs/shared/interfaces/src/lib/movies/` |
 | Movie title helpers | `libs/shared/utils/src/lib/movies/` |
 | `Language` / `TranslationObject` | `libs/shared/interfaces/src/lib/i18n/` |
@@ -55,6 +56,7 @@ Can be found in tsconfig.base.json
 | `libs/shared/constants` | `constants` |
 | `libs/shared/utils` | `utils` |
 | `libs/frontend/data-access/movies` | `frontend-data-access-movies` |
+| `libs/frontend/services/movies` | `frontend-services-movies` |
 
 ## Nx tags
 

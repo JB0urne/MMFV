@@ -16,7 +16,8 @@
             "@mmfv/constants": ["./libs/shared/constants/src/index.ts"],
             "@mmfv/interfaces": ["./libs/shared/interfaces/src/index.ts"],
             "@mmfv/utils": ["./libs/shared/utils/src/index.ts"],
-            "@mmfv/frontend/data-access/movies": ["./libs/frontend/data-access/movies/src/index.ts"]
+            "@mmfv/frontend/data-access/movies": ["./libs/frontend/data-access/movies/src/index.ts"],
+            "@mmfv/frontend/services/movies": ["./libs/frontend/services/movies/src/index.ts"]
         },
         "strict": true
     },
